@@ -1,0 +1,14 @@
+{
+  "name": "Klondike Solitaire",
+  "short_name": "Klondike",
+  "description": "A simple, touch-friendly game of Klondike solitaire.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0a3229",
+  "theme_color": "#0e3b2e",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

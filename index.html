@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+<meta name="theme-color" content="#0e3b2e">
+<meta name="description" content="Klondike solitaire — a simple, touch friendly card game for mobile.">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Klondike Solitaire</title>
+<link rel="stylesheet" href="assets/css/style.css">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon.svg">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%230e3b2e'/><text x='16' y='24' font-size='22' text-anchor='middle' fill='%23fff'>%E2%99%A0</text></svg>">
+</head>
+<body>
+
+<div id="app">
+
+  <header id="scoreboard">
+    <div class="stat">
+      <span class="stat-label">Score</span>
+      <span class="stat-value" id="statScore">0</span>
+    </div>
+    <div class="stat">
+      <span class="stat-label">Time</span>
+      <span class="stat-value" id="statTime">0:00</span>
+    </div>
+    <div class="stat">
+      <span class="stat-label">Moves</span>
+      <span class="stat-value" id="statMoves">0</span>
+    </div>
+    <div class="stat stat-best">
+      <span class="stat-label">Best</span>
+      <span class="stat-value" id="statBest">—</span>
+    </div>
+  </header>
+
+  <main id="boardWrap">
+    <div id="board" class="pat-lattice" aria-label="Solitaire board"></div>
+  </main>
+
+  <nav id="toolbar">
+    <button class="tool" id="btnUndo" type="button"><span class="tool-icon">&#8630;</span><span class="tool-label">Undo</span></button>
+    <button class="tool" id="btnAuto" type="button"><span class="tool-icon">&#9889;</span><span class="tool-label">Auto</span></button>
+    <button class="tool" id="btnPause" type="button"><span class="tool-icon">&#10073;&#10073;</span><span class="tool-label">Pause</span></button>
+    <button class="tool" id="btnNew" type="button"><span class="tool-icon">&#8635;</span><span class="tool-label">New</span></button>
+    <button class="tool" id="btnMenu" type="button"><span class="tool-icon">&#9776;</span><span class="tool-label">Menu</span></button>
+  </nav>
+
+</div>
+
+<!-- Paused / continue overlay -->
+<div class="overlay" id="pauseOverlay" hidden>
+  <div class="panel">
+    <h2 id="pauseTitle">Paused</h2>
+    <p class="muted" id="pauseText">Your game is saved. Pick up right where you left off.</p>
+    <dl class="summary" id="pauseSummary"></dl>
+    <div class="panel-actions">
+      <button class="btn btn-primary" id="btnResume" type="button">Continue game</button>
+      <button class="btn" id="btnPauseNew" type="button">New game</button>
+    </div>
+  </div>
+</div>
+
+<!-- Win overlay -->
+<div class="overlay" id="winOverlay" hidden>
+  <div class="panel">
+    <div class="trophy">&#9824;</div>
+    <h2>You won!</h2>
+    <dl class="summary" id="winSummary"></dl>
+    <div class="panel-actions">
+      <button class="btn btn-primary" id="btnWinNew" type="button">Play again</button>
+      <button class="btn" id="btnWinClose" type="button">View board</button>
+    </div>
+  </div>
+</div>
+
+<!-- Menu / settings -->
+<div class="overlay" id="menuOverlay" hidden>
+  <div class="panel panel-wide">
+    <div class="panel-head">
+      <h2>Menu</h2>
+      <button class="icon-btn" id="btnMenuClose" type="button" aria-label="Close menu">&times;</button>
+    </div>
+
+    <div class="tabs" role="tablist">
+      <button class="tab is-active" data-tab="cards" type="button" role="tab">Card backs</button>
+      <button class="tab" data-tab="game" type="button" role="tab">Game</button>
+      <button class="tab" data-tab="stats" type="button" role="tab">Scores</button>
+    </div>
+
+    <section class="tab-panel is-active" data-panel="cards">
+      <h3>Pattern</h3>
+      <div class="swatches" id="backPatterns"></div>
+      <h3>Colour</h3>
+      <div class="swatches swatches-color" id="backColors"></div>
+    </section>
+
+    <section class="tab-panel" data-panel="game">
+      <h3>Draw mode</h3>
+      <div class="segmented" id="drawMode">
+        <button class="seg" data-draw="1" type="button">Draw 1</button>
+        <button class="seg" data-draw="3" type="button">Draw 3</button>
+      </div>
+      <p class="muted small">Changing the draw mode starts a new game.</p>
+      <h3>Options</h3>
+      <label class="row-toggle"><span>Tap a card twice to send it home</span><input type="checkbox" id="optQuickFoundation" checked></label>
+      <label class="row-toggle"><span>Vibrate on invalid move</span><input type="checkbox" id="optHaptics" checked></label>
+      <h3>How to play</h3>
+      <p class="muted small">Build the four foundations up from Ace to King by suit. Stack tableau cards down in alternating colours. Only Kings go into an empty column. Drag a card, or tap it and then tap where it should go.</p>
+    </section>
+
+    <section class="tab-panel" data-panel="stats">
+      <dl class="summary" id="statsSummary"></dl>
+      <h3>Best games</h3>
+      <ol class="scorelist" id="scoreList"></ol>
+      <div class="panel-actions">
+        <button class="btn btn-danger" id="btnResetStats" type="button">Reset scoreboard</button>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script src="assets/js/cards.js"></script>
+<script src="assets/js/storage.js"></script>
+<script src="assets/js/game.js"></script>
+<script src="assets/js/ui.js"></script>
+<script src="assets/js/app.js"></script>
+</body>
+</html>
