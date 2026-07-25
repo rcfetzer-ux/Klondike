@@ -3,7 +3,7 @@
 (function () {
   'use strict';
 
-  var BUILD = '2026.07.25.4';
+  var BUILD = '2026.07.25.5';
 
   var BACK_PATTERNS = [
     { id: 'lattice', name: 'Lattice' },
@@ -42,7 +42,8 @@
    'pauseSummary', 'btnResume', 'btnPauseNew', 'winOverlay', 'winSummary', 'btnWinNew',
    'btnWinClose', 'menuOverlay', 'btnMenuClose', 'backPatterns', 'backColors',
    'drawMode', 'optQuickFoundation', 'optHaptics', 'statsSummary', 'scoreList',
-   'btnResetStats', 'hintToast', 'buildStamp'].forEach(function (id) { el[id] = document.getElementById(id); });
+   'btnResetStats', 'hintToast', 'buildStamp', 'optWinnable', 'searchOverlay',
+   'searchText', 'btnSearchCancel'].forEach(function (id) { el[id] = document.getElementById(id); });
 
   /* ---- helpers --------------------------------------------------------- */
 
@@ -96,19 +97,80 @@
 
   /* ---- game lifecycle -------------------------------------------------- */
 
-  function startGame(options) {
-    game = new Klondike({ drawCount: settings.drawCount });
+  function installGame(fresh, options) {
+    game = fresh;
     recorded = false;
     dead = false;
     hintIndex = 0;
     paused = false;
     autoRunning = false;
+    toast(null);
     UI.setLocked(false);
     UI.setGame(game);
     updateScoreboard();
     startTimer();
     save();
     if (options && options.closeOverlays) closeOverlays();
+  }
+
+  function startGame(options) {
+    if (settings.winnableOnly && window.Solver) {
+      findWinnableDeal(options);
+      return;
+    }
+    installGame(new Klondike({ drawCount: settings.drawCount }), options);
+  }
+
+  /* Shuffles until the solver can prove a deal is winnable, in slices, so
+     the page keeps breathing while it looks. */
+  var searching = false;
+
+  function findWinnableDeal(options) {
+    if (searching) return;
+    searching = true;
+    stopTimer();
+    UI.setLocked(true);
+    closeOverlays();
+    el.searchText.textContent = 'Checking shuffles for one with a guaranteed win.';
+    show(el.searchOverlay);
+
+    var attempts = 0;
+    var started = Date.now();
+    var GIVE_UP_MS = 9000;
+
+    function attempt() {
+      if (!searching) return;
+      var candidate = new Klondike({ drawCount: settings.drawCount });
+      attempts += 1;
+
+      var verdict = Solver.solve(candidate, {
+        maxNodes: 30000,
+        deadline: Date.now() + 500     // no single shuffle may hog the thread
+      });
+
+      if (verdict.result === Solver.WIN) {
+        candidate.winnable = true;
+        finish(candidate);
+        return;
+      }
+      if (Date.now() - started > GIVE_UP_MS) {
+        finish(candidate, true);       // rather deal than leave them waiting
+        return;
+      }
+      el.searchText.textContent = 'Checked ' + attempts + ' shuffle' + (attempts === 1 ? '' : 's') + '…';
+      setTimeout(attempt, 0);
+    }
+
+    function finish(candidate, gaveUp) {
+      searching = false;
+      hide(el.searchOverlay);
+      installGame(candidate, options);
+      if (gaveUp) {
+        toast('Could not prove a deal winnable in time — this one is unverified.');
+      }
+    }
+
+    setTimeout(attempt, 30);
   }
 
   function resumeGame(data) {
@@ -244,6 +306,9 @@
       ['Moves', game.moves],
       ['Cards home', game.foundationCount() + ' of 52']
     ]);
+    el.deadText.textContent = game.winnable
+      ? 'This deal could be won — a different line of play gets there. Undo and try again, or take a fresh one.'
+      : 'This deal is out of plays — nothing on the board moves, and nothing left to turn up can help.';
     el.btnDeadUndo.hidden = !game.canUndo();
     show(el.deadOverlay);
   }
@@ -428,6 +493,17 @@
       syncMenu();
     });
 
+    el.optWinnable.addEventListener('change', function () {
+      settings.winnableOnly = el.optWinnable.checked;
+      persistSettings();
+      if (!settings.winnableOnly) return;
+      if (game && !game.won && !dead && game.moves > 0 &&
+          !window.confirm('Deal a fresh winnable game now? The current one will be lost.')) return;
+      abandonCurrent();
+      Store.clearGame();
+      hide(el.menuOverlay);
+      startGame({ closeOverlays: true });
+    });
     el.optQuickFoundation.addEventListener('change', function () {
       settings.quickFoundation = el.optQuickFoundation.checked;
       persistSettings();
@@ -471,6 +547,7 @@
     document.querySelectorAll('[data-draw]').forEach(function (b) {
       b.classList.toggle('is-active', +b.dataset.draw === settings.drawCount);
     });
+    el.optWinnable.checked = !!settings.winnableOnly;
     el.optQuickFoundation.checked = !!settings.quickFoundation;
     el.optHaptics.checked = !!settings.haptics;
   }
@@ -528,6 +605,12 @@
       if (e.target === el.menuOverlay) hide(el.menuOverlay);
     });
 
+    el.btnSearchCancel.addEventListener('click', function () {
+      if (!searching) return;
+      searching = false;
+      hide(el.searchOverlay);
+      installGame(new Klondike({ drawCount: settings.drawCount }));
+    });
     el.btnResume.addEventListener('click', resume);
     el.btnPauseNew.addEventListener('click', newGame);
     el.btnDeadNew.addEventListener('click', newGame);

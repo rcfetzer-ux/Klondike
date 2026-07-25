@@ -23,8 +23,32 @@ step, no network calls — open `index.html` and play.
 - **Automatic ending.** When a deal genuinely runs out of plays the game stops
   the clock and says so, offering a new deal or an undo to back out of the move
   that killed it.
+- **Winnable deals only** (optional). Every shuffle is run through a solver
+  before you see it, and only a deal with a proven winning line is dealt — so a
+  loss is down to the line you took, not the cards.
 - **Undo** (deep history), **Auto** to send everything home once the board is
   open, and a choice of **draw 1** or **draw 3**.
+
+### Winnable deals
+
+`assets/js/solver.js` searches for an actual winning line, so "winnable" is a
+proof and not an estimate — `tests/solver.test.js` replays each line it finds
+through the real game engine and insists the engine itself reports a win.
+
+Two things make it quick enough to run on a phone between deals: turning the
+deck is never a move on its own (the generator works out which cards can reach
+the top of the waste and offers "turn the deck N times, then play that card" as
+one step), and only column moves that turn a card over, clear a column, or free
+a card for a foundation are branched on. Finding a verified deal takes a median
+of ~120ms and under a second in the worst case on a laptop, a few times that on
+a phone; a spinner covers the wait and can be dismissed to take an unchecked
+deal.
+
+The solver never pulls cards back off a foundation, which makes it incomplete:
+some winnable deals are reported unsolvable and quietly reshuffled. That is the
+safe direction to be wrong in — a deal is only ever accepted on a proven win —
+but it does mean this setting skips the very hardest deals rather than serving
+every winnable one.
 
 ### What counts as "no moves left"
 
@@ -83,6 +107,7 @@ manifest.json         installs to a phone home screen
 assets/css/style.css  all styling, including the card-back patterns
 assets/js/cards.js    deck and the stacking rules
 assets/js/game.js     game engine: piles, moves, scoring, undo, save/restore
+assets/js/solver.js   searches for a winning line, for the winnable-deals setting
 assets/js/storage.js  localStorage for the save, settings and scoreboard
 assets/js/ui.js       board layout, rendering, drag and tap handling
 assets/js/app.js      timer, autosave, scoreboard, menu wiring
@@ -99,6 +124,7 @@ with no dependencies:
 
 ```sh
 node tests/engine.test.js
+node tests/solver.test.js
 ```
 
 Alongside the unit tests it plays 120 deals per draw mode to completion,

@@ -434,6 +434,7 @@ var Klondike = (function () {
   Game.prototype.toJSON = function () {
     var data = this.snapshot();
     data.drawCount = this.drawCount;
+    data.winnable = !!this.winnable;
     data.started = this.started;
     data.history = this.history.slice(-SAVED_HISTORY);
     return data;
@@ -444,6 +445,7 @@ var Klondike = (function () {
     game.drawCount = data.drawCount === 3 ? 3 : 1;
     game.started = data.started || Date.now();
     game.history = Array.isArray(data.history) ? data.history : [];
+    game.winnable = !!data.winnable;
     game.restore(data);
     return game;
   };

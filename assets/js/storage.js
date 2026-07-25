@@ -51,6 +51,7 @@ var Store = (function () {
     backPattern: 'lattice',
     backColor: 'crimson',
     drawCount: 1,
+    winnableOnly: false,
     quickFoundation: true,
     haptics: true
   };
