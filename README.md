@@ -15,8 +15,26 @@ step, no network calls — open `index.html` and play.
   back tomorrow — the game reopens exactly where you left it, clock included.
 - **Customisable card backs.** Six patterns × eight colours, remembered between
   sessions.
+- **Hints.** Press *Hint* to light up a card and where it should go; press it
+  again to cycle through the other options. When nothing on the board moves, the
+  hint points at the stock instead.
+- **Automatic ending.** When a deal genuinely runs out of plays the game stops
+  the clock and says so, offering a new deal or an undo to back out of the move
+  that killed it.
 - **Undo** (deep history), **Auto** to send everything home once the board is
   open, and a choice of **draw 1** or **draw 3**.
+
+### What counts as "no moves left"
+
+The game ends when no move would *advance* the deal and nothing still in the
+stock or waste can be placed anywhere. Moves that advance the deal are: playing
+to a foundation, playing a card off the waste, moving a run that turns a
+face-down card over or clears a column, and splitting a run to free the card
+beneath it for a foundation. Sliding a run between two interchangeable parents
+is not counted — it rearranges the board without getting anywhere, and treating
+it as a move would mean the game could never end. In draw-3, where not every
+buried card is guaranteed to reach the top of the waste, the check errs towards
+keeping the game alive.
 
 ## Rules and scoring
 

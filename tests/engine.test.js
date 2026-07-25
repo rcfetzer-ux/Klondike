@@ -173,5 +173,102 @@ t.tableau[1] = [C('H', 3)];
 const target = t.findAutoTarget({ type: 'tableau', i: 0, ci: 0 });
 ok(target && target.type === 'foundation', 'auto target prefers foundation');
 
+// ---- hints -------------------------------------------------------------
+t = blank();
+t.foundations[0] = [C('S', 1)];
+t.tableau[0] = [C('S', 2)];
+t.tableau[1] = [C('H', 3)];
+let moves = t.findMoves();
+ok(moves.length > 0, 'findMoves sees something to do');
+ok(moves[0].kind === 'foundation', 'a foundation move is hinted first, got ' + moves[0].kind);
+ok(moves[0].source.type === 'tableau' && moves[0].target.type === 'foundation', 'hint points S2 at its foundation');
+
+// turning a card over is preferred over an idle shuffle
+t = blank();
+t.tableau[0] = [C('D', 7, false), C('S', 10)];
+t.tableau[1] = [C('H', 11)];
+moves = t.findMoves();
+ok(moves.length === 1 && moves[0].kind === 'reveal', 'moving a run that flips a card is hinted: ' + JSON.stringify(moves.map(m => m.kind)));
+
+// a waste card that can be played
+t = blank();
+t.waste = [C('H', 12)];
+t.tableau[0] = [C('S', 13)];
+moves = t.findMoves();
+ok(moves.some(m => m.kind === 'wasteToTableau'), 'waste card placement is hinted');
+
+// pure shuffles are not offered: nothing is revealed, nothing is emptied
+t = blank();
+t.tableau[0] = [C('S', 13), C('H', 12), C('S', 11), C('H', 10)];
+t.tableau[1] = [C('C', 13), C('D', 12), C('C', 11)];
+ok(t.findMoves().length === 0, 'shuffling a run between equivalent parents is not a hint');
+
+// splitting a run is offered when it frees a card for a foundation
+t = blank();
+t.foundations[0] = [C('S', 1), C('S', 2), C('S', 3), C('S', 4)];
+t.tableau[0] = [C('S', 5), C('H', 4)];
+t.tableau[1] = [C('C', 5)];
+moves = t.findMoves();
+ok(moves.some(m => m.kind === 'unlock'), 'splitting a run to free a foundation card is hinted: ' + JSON.stringify(moves.map(m => m.kind)));
+
+// moving a whole column to an empty column achieves nothing
+t = blank();
+t.tableau[0] = [C('S', 13), C('H', 12)];
+t.tableau[1] = [];
+ok(t.findMoves().length === 0, 'relocating a full column to an empty one is not a hint');
+
+// ...but clearing a column onto a real card is progress
+t = blank();
+t.tableau[0] = [C('H', 12)];
+t.tableau[1] = [C('S', 13)];
+moves = t.findMoves();
+ok(moves.length === 1 && moves[0].kind === 'empty', 'emptying a column is hinted: ' + JSON.stringify(moves.map(m => m.kind)));
+
+// ---- dead ends ---------------------------------------------------------
+t = blank();
+t.tableau[0] = [C('S', 13)];
+t.tableau[1] = [C('H', 13)];
+t.tableau[2] = [C('D', 13)];
+t.tableau[3] = [C('C', 13)];
+ok(t.findMoves().length === 0, 'four lone kings have nowhere to go');
+ok(t.isDeadEnd() === true, 'four lone kings with an empty stock is a dead end');
+ok(t.canDraw() === false, 'nothing left to draw');
+
+t.stock = [C('S', 1, false)];
+ok(t.stockHasPlayable() === true, 'an ace in the stock is playable');
+ok(t.isDeadEnd() === false, 'a playable stock card keeps the game alive');
+
+t.stock = [C('H', 7, false)];
+ok(t.stockHasPlayable() === false, 'a 7 with no red-8 parent is not playable');
+ok(t.isDeadEnd() === true, 'an unplayable stock means the deal is over');
+
+// a king in the stock can still open an empty column
+t = blank();
+t.tableau[0] = [C('S', 13)];
+t.stock = [C('H', 13, false)];
+ok(t.isDeadEnd() === false, 'a king can still take an empty column');
+
+// a board move keeps the game alive even with an empty stock
+t = blank();
+t.tableau[0] = [C('S', 13)];
+t.tableau[1] = [C('H', 12)];
+ok(t.isDeadEnd() === false, 'a legal board move is not a dead end');
+
+// a won game is never a dead end
+t = blank();
+['S', 'H', 'D', 'C'].forEach((s, i) => {
+  for (let r = 1; r <= 13; r++) t.foundations[i].push(C(s, r));
+});
+t.checkWin();
+ok(t.isDeadEnd() === false, 'a won game is not a dead end');
+
+// face-down cards below a movable run still count as progress
+t = blank();
+t.tableau[0] = [C('D', 3, false), C('S', 13)];
+t.tableau[1] = [];
+moves = t.findMoves();
+ok(moves.length === 1 && moves[0].kind === 'reveal', 'moving a king off a hidden card into an empty column is hinted');
+ok(t.isDeadEnd() === false, 'that board is not a dead end');
+
 console.log(fails === 0 ? 'ALL ENGINE TESTS PASSED' : fails + ' FAILURE(S)');
 process.exit(fails ? 1 : 0);

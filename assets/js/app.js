@@ -30,10 +30,13 @@
   var autoRunning = false;
   var timer = null;
   var recorded = false;   // this deal has already been added to the scoreboard
+  var dead = false;       // the deal ran out of plays
+  var hintIndex = 0;      // cycles through the available hints
 
   var el = {};
   ['statScore', 'statTime', 'statMoves', 'statBest', 'board', 'btnUndo', 'btnAuto',
-   'btnPause', 'btnNew', 'btnMenu', 'pauseOverlay', 'pauseTitle', 'pauseText',
+   'btnHint', 'btnPause', 'btnNew', 'btnMenu', 'pauseOverlay', 'pauseTitle', 'pauseText',
+   'deadOverlay', 'deadSummary', 'deadText', 'btnDeadNew', 'btnDeadUndo',
    'pauseSummary', 'btnResume', 'btnPauseNew', 'winOverlay', 'winSummary', 'btnWinNew',
    'btnWinClose', 'menuOverlay', 'btnMenuClose', 'backPatterns', 'backColors',
    'drawMode', 'optQuickFoundation', 'optHaptics', 'statsSummary', 'scoreList',
@@ -65,6 +68,7 @@
     el.statBest.textContent = stats.bestScore ? stats.bestScore : '—';
     el.btnUndo.disabled = !game.canUndo() || autoRunning;
     el.btnAuto.disabled = autoRunning || game.won || !game.nextFoundationMove();
+    el.btnHint.disabled = autoRunning || game.won || dead;
   }
 
   /* ---- timer and saving ------------------------------------------------ */
@@ -93,6 +97,8 @@
   function startGame(options) {
     game = new Klondike({ drawCount: settings.drawCount });
     recorded = false;
+    dead = false;
+    hintIndex = 0;
     paused = false;
     autoRunning = false;
     UI.setLocked(false);
@@ -106,6 +112,8 @@
   function resumeGame(data) {
     game = Klondike.fromJSON(data);
     recorded = false;
+    dead = false;
+    hintIndex = 0;
     autoRunning = false;
     UI.setGame(game);
     updateScoreboard();
@@ -121,7 +129,7 @@
   }
 
   function newGame() {
-    if (game && !game.won && game.moves > 0) {
+    if (game && !game.won && !dead && game.moves > 0) {
       if (!window.confirm('Start a new game? The current one will be lost.')) return;
     }
     abandonCurrent();
@@ -130,9 +138,68 @@
   }
 
   function onMove() {
+    hintIndex = 0;
     updateScoreboard();
-    if (game.won) handleWin();
-    else save();
+    if (game.won) { handleWin(); return; }
+    save();
+    if (!autoRunning) checkDeadEnd();
+  }
+
+  /* ---- hints ----------------------------------------------------------- */
+
+  /* Every useful move, plus turning the stock over as a last suggestion. */
+  function hintList() {
+    var list = game.findMoves();
+    if (game.canDraw()) list.push({ kind: 'draw' });
+    return list;
+  }
+
+  function showHint() {
+    if (dead || game.won || autoRunning || paused) return;
+    var list = hintList();
+    if (!list.length) { endDeadGame(); return; }
+    if (hintIndex >= list.length) hintIndex = 0;
+    UI.showHint(list[hintIndex]);
+    hintIndex = (hintIndex + 1) % list.length;
+  }
+
+  /* ---- running out of moves -------------------------------------------- */
+
+  function checkDeadEnd() {
+    if (dead || paused || game.won || autoRunning) return;
+    if (game.isDeadEnd()) endDeadGame();
+  }
+
+  function endDeadGame() {
+    dead = true;
+    stopTimer();
+    UI.clearHint();
+    UI.clearSelection();
+    UI.setLocked(true);
+    UI.render();
+    save();
+    updateScoreboard();
+    fillSummary(el.deadSummary, [
+      ['Score', game.score],
+      ['Time', formatTime(game.elapsed)],
+      ['Moves', game.moves],
+      ['Cards home', game.foundationCount() + ' of 52']
+    ]);
+    el.btnDeadUndo.hidden = !game.canUndo();
+    show(el.deadOverlay);
+  }
+
+  /* Backing out of a dead end puts the player back in the game. */
+  function reviveFromDeadEnd() {
+    if (!game.undo()) return;
+    dead = false;
+    hintIndex = 0;
+    hide(el.deadOverlay);
+    UI.setLocked(false);
+    UI.render();
+    updateScoreboard();
+    startTimer();
+    save();
   }
 
   function handleWin() {
@@ -197,6 +264,7 @@
       }
       stopAuto();
       save();
+      checkDeadEnd();
     }
     setTimeout(step, 40);
   }
@@ -215,11 +283,12 @@
   function closeOverlays() {
     hide(el.pauseOverlay);
     hide(el.winOverlay);
+    hide(el.deadOverlay);
     hide(el.menuOverlay);
   }
 
   function pauseGame() {
-    if (game.won) return;
+    if (game.won || dead) return;
     stopAuto();
     paused = true;
     UI.setLocked(true);
@@ -239,6 +308,7 @@
     UI.setLocked(false);
     hide(el.pauseOverlay);
     UI.render();
+    checkDeadEnd();
   }
 
   function offerContinue(data) {
@@ -376,8 +446,9 @@
     el.btnUndo.addEventListener('click', function () {
       if (autoRunning) return;
       UI.clearSelection();
-      if (game.undo()) { UI.render(); updateScoreboard(); save(); }
+      if (game.undo()) { hintIndex = 0; UI.render(); updateScoreboard(); save(); }
     });
+    el.btnHint.addEventListener('click', showHint);
     el.btnAuto.addEventListener('click', autoFinish);
     el.btnPause.addEventListener('click', pauseGame);
     el.btnNew.addEventListener('click', newGame);
@@ -393,6 +464,8 @@
 
     el.btnResume.addEventListener('click', resume);
     el.btnPauseNew.addEventListener('click', newGame);
+    el.btnDeadNew.addEventListener('click', newGame);
+    el.btnDeadUndo.addEventListener('click', reviveFromDeadEnd);
     el.btnWinNew.addEventListener('click', function () { hide(el.winOverlay); startGame(); });
     el.btnWinClose.addEventListener('click', function () { hide(el.winOverlay); });
 
@@ -431,6 +504,9 @@
     get game() { return game; },
     get stats() { return stats; },
     get settings() { return settings; },
+    get dead() { return dead; },
+    hint: showHint,
+    checkDeadEnd: checkDeadEnd,
     ui: UI,
     save: save,
     refresh: function () { UI.render(); updateScoreboard(); },

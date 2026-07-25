@@ -18,6 +18,8 @@ var UI = (function () {
   var pending = null;   // pointer down, not yet a drag
   var drag = null;      // active drag
   var locked = false;   // true during auto-finish / pause
+  var hint = null;      // { cards: [id], target: ref } or { stock: true }
+  var hintTimer = null;
 
   /* ---- setup ----------------------------------------------------------- */
 
@@ -69,6 +71,7 @@ var UI = (function () {
   function setGame(next) {
     game = next;
     selection = null;
+    clearHint();
     pending = null;
     drag = null;
     Object.keys(cardEls).forEach(function (id) { cardEls[id].remove(); });
@@ -205,11 +208,15 @@ var UI = (function () {
     board.style.setProperty('--card-w', layout.cardW + 'px');
     board.style.setProperty('--card-h', layout.cardH + 'px');
 
+    var hinted = hintCardIds();
+    var hintTargetEl = hintTargetElement();
+
     PILE_ORDER.forEach(function (key) {
       var s = layout.slots[key];
       var el = slotEls[key];
       if (!s || !el) return;
       el.style.transform = 'translate3d(' + s.x + 'px,' + s.y + 'px,0)';
+      el.classList.toggle('is-hint-target', el === hintTargetEl);
     });
     slotEls.stock.classList.toggle('is-recycle', game.stock.length === 0 && game.waste.length > 0);
     slotEls.stock.classList.toggle('is-empty', game.stock.length === 0);
@@ -222,6 +229,8 @@ var UI = (function () {
       var p = layout.pos[card.id];
       el.classList.toggle('is-down', !card.up);
       el.classList.toggle('is-selected', selected[card.id] === true);
+      el.classList.toggle('is-hint', hinted[card.id] === true);
+      el.classList.toggle('is-hint-target', el === hintTargetEl);
       el.dataset.type = ref.type;
       el.dataset.i = ref.i;
       el.dataset.ci = ref.ci;
@@ -253,6 +262,49 @@ var UI = (function () {
     return map;
   }
 
+  /* ---- hints ----------------------------------------------------------- */
+
+  function hintCardIds() {
+    var map = {};
+    if (hint && hint.cards) hint.cards.forEach(function (id) { map[id] = true; });
+    return map;
+  }
+
+  /* The pile a hint points at: its top card, or the empty slot beneath it. */
+  function hintTargetElement() {
+    if (!hint) return null;
+    if (hint.stock) {
+      return game.stock.length
+        ? cardEls[game.stock[game.stock.length - 1].id]
+        : slotEls.stock;
+    }
+    if (!hint.target) return null;
+    var pile = game.pile(hint.target);
+    if (pile && pile.length) return cardEls[pile[pile.length - 1].id];
+    return slotEls[(hint.target.type === 'foundation' ? 'f' : 't') + hint.target.i] || null;
+  }
+
+  /* move is a { source, target } from findMoves(), or { kind: 'draw' }. */
+  function showHint(move) {
+    clearHint();
+    if (!move) return;
+    if (move.kind === 'draw') {
+      hint = { stock: true };
+    } else {
+      var cards = game.grab(move.source) || [];
+      hint = { cards: cards.map(function (c) { return c.id; }), target: move.target };
+    }
+    selection = null;
+    render();
+    hintTimer = setTimeout(function () { clearHint(); render(); }, 2600);
+  }
+
+  function clearHint() {
+    if (hintTimer) clearTimeout(hintTimer);
+    hintTimer = null;
+    hint = null;
+  }
+
   /* ---- input ----------------------------------------------------------- */
 
   function setLocked(value) { locked = !!value; }
@@ -276,6 +328,7 @@ var UI = (function () {
     if (locked || !game || e.button > 0) return;
     var ref = refFromEvent(e);
     if (!ref) return;
+    clearHint();
     pending = { ref: ref, x: e.clientX, y: e.clientY, moved: false, pointerId: e.pointerId };
 
     if (ref.type === 'stock') return;
@@ -403,6 +456,7 @@ var UI = (function () {
 
   function afterMove() {
     selection = null;
+    clearHint();
     render();
     if (hooks.onMove) hooks.onMove();
   }
@@ -419,6 +473,8 @@ var UI = (function () {
     setSettings: setSettings,
     setLocked: setLocked,
     clearSelection: clearSelection,
+    showHint: showHint,
+    clearHint: clearHint,
     applyCardBack: applyCardBack,
     render: render,
     flash: flash

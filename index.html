@@ -43,6 +43,7 @@
 
   <nav id="toolbar">
     <button class="tool" id="btnUndo" type="button"><span class="tool-icon">&#8630;</span><span class="tool-label">Undo</span></button>
+    <button class="tool" id="btnHint" type="button"><span class="tool-icon">&#128161;</span><span class="tool-label">Hint</span></button>
     <button class="tool" id="btnAuto" type="button"><span class="tool-icon">&#9889;</span><span class="tool-label">Auto</span></button>
     <button class="tool" id="btnPause" type="button"><span class="tool-icon">&#10073;&#10073;</span><span class="tool-label">Pause</span></button>
     <button class="tool" id="btnNew" type="button"><span class="tool-icon">&#8635;</span><span class="tool-label">New</span></button>
@@ -73,6 +74,20 @@
     <div class="panel-actions">
       <button class="btn btn-primary" id="btnWinNew" type="button">Play again</button>
       <button class="btn" id="btnWinClose" type="button">View board</button>
+    </div>
+  </div>
+</div>
+
+<!-- No moves left -->
+<div class="overlay" id="deadOverlay" hidden>
+  <div class="panel">
+    <div class="trophy trophy-dim">&#9824;</div>
+    <h2>No moves left</h2>
+    <p class="muted" id="deadText">This deal is out of plays — nothing on the board moves, and nothing left to turn up can help.</p>
+    <dl class="summary" id="deadSummary"></dl>
+    <div class="panel-actions">
+      <button class="btn btn-primary" id="btnDeadNew" type="button">New game</button>
+      <button class="btn" id="btnDeadUndo" type="button">Undo last move</button>
     </div>
   </div>
 </div>
@@ -109,7 +124,7 @@
       <label class="row-toggle"><span>Tap a card twice to send it home</span><input type="checkbox" id="optQuickFoundation" checked></label>
       <label class="row-toggle"><span>Vibrate on invalid move</span><input type="checkbox" id="optHaptics" checked></label>
       <h3>How to play</h3>
-      <p class="muted small">Build the four foundations up from Ace to King by suit. Stack tableau cards down in alternating colours. Only Kings go into an empty column. Drag a card, or tap it and then tap where it should go.</p>
+      <p class="muted small">Build the four foundations up from Ace to King by suit. Stack tableau cards down in alternating colours. Only Kings go into an empty column. Drag a card, or tap it and then tap where it should go. Stuck? <em>Hint</em> points out a move — press it again for another one. If the deal ever runs out of plays, the game says so and ends.</p>
     </section>
 
     <section class="tab-panel" data-panel="stats">

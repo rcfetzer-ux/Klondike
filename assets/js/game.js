@@ -174,6 +174,107 @@ var Klondike = (function () {
     return null;
   };
 
+  /* ---- hints and dead ends --------------------------------------------- */
+
+  /* How interesting each kind of move is, best first. */
+  var RANK = { foundation: 0, reveal: 1, unlock: 2, empty: 3, wasteToTableau: 4 };
+
+  /* Every move that actually gets the player somewhere, best first.
+     Shuffling a run between two equivalent parents is deliberately left out:
+     it changes the board without advancing it. */
+  Game.prototype.findMoves = function () {
+    var self = this;
+    var moves = [];
+
+    function foundationTarget(cards) {
+      if (!cards || cards.length !== 1) return null;
+      for (var f = 0; f < 4; f++) {
+        if (self.canDrop(cards, { type: 'foundation', i: f })) return { type: 'foundation', i: f };
+      }
+      return null;
+    }
+
+    function tableauTarget(cards, skipColumn, allowEmpty) {
+      if (!cards) return null;
+      for (var d = 0; d < 7; d++) {
+        if (d === skipColumn) continue;
+        if (!allowEmpty && !self.tableau[d].length) continue;
+        if (self.canDrop(cards, { type: 'tableau', i: d })) return { type: 'tableau', i: d };
+      }
+      return null;
+    }
+
+    function add(source, target, kind) {
+      if (target) moves.push({ source: source, target: target, kind: kind, rank: RANK[kind] });
+    }
+
+    if (this.waste.length) {
+      var wasteRef = { type: 'waste', i: 0 };
+      var wasteCards = this.grab(wasteRef);
+      add(wasteRef, foundationTarget(wasteCards), 'foundation');
+      add(wasteRef, tableauTarget(wasteCards, -1, true), 'wasteToTableau');
+    }
+
+    for (var c = 0; c < 7; c++) {
+      var pile = this.tableau[c];
+      if (!pile.length) continue;
+
+      var topRef = { type: 'tableau', i: c, ci: pile.length - 1 };
+      add(topRef, foundationTarget(this.grab(topRef)), 'foundation');
+
+      var firstUp = 0;
+      while (firstUp < pile.length && !pile[firstUp].up) firstUp++;
+      if (firstUp >= pile.length) continue;
+
+      /* The whole face-up run: worth moving when it turns a card over, or
+         when it clears the column outright. */
+      var runRef = { type: 'tableau', i: c, ci: firstUp };
+      var run = this.grab(runRef);
+      var empties = firstUp === 0;
+      add(runRef, tableauTarget(run, c, !empties), empties ? 'empty' : 'reveal');
+
+      /* Splitting a run only earns its keep when it frees the card beneath
+         for a foundation. */
+      for (var n = firstUp + 1; n < pile.length; n++) {
+        if (!foundationTarget([pile[n - 1]])) continue;
+        var subRef = { type: 'tableau', i: c, ci: n };
+        add(subRef, tableauTarget(this.grab(subRef), c, true), 'unlock');
+      }
+    }
+
+    moves.sort(function (a, b) { return a.rank - b.rank; });
+    return moves;
+  };
+
+  Game.prototype.canDraw = function () {
+    return this.stock.length > 0 || this.waste.length > 0;
+  };
+
+  /* Could any card still sitting in the stock or waste be placed at all?
+     In draw-3 not every card is guaranteed to reach the top of the waste,
+     so this errs towards "yes" rather than ending a live game. */
+  Game.prototype.stockHasPlayable = function () {
+    var pool = this.stock.concat(this.waste);
+    for (var i = 0; i < pool.length; i++) {
+      var card = pool[i];
+      for (var f = 0; f < 4; f++) {
+        if (Cards.canStackFoundation(card, this.foundations[f])) return true;
+      }
+      for (var t = 0; t < 7; t++) {
+        var pile = this.tableau[t];
+        if (Cards.canStackTableau(card, pile.length ? pile[pile.length - 1] : null)) return true;
+      }
+    }
+    return false;
+  };
+
+  /* Nothing on the board advances, and nothing left to turn up can help. */
+  Game.prototype.isDeadEnd = function () {
+    if (this.won) return false;
+    if (this.findMoves().length) return false;
+    return !this.stockHasPlayable();
+  };
+
   Game.prototype.sendToFoundation = function (source) {
     var cards = this.grab(source);
     if (!cards || cards.length !== 1) return false;
