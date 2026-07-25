@@ -32,9 +32,13 @@ to a foundation, playing a card off the waste, moving a run that turns a
 face-down card over or clears a column, and splitting a run to free the card
 beneath it for a foundation. Sliding a run between two interchangeable parents
 is not counted — it rearranges the board without getting anywhere, and treating
-it as a move would mean the game could never end. In draw-3, where not every
-buried card is guaranteed to reach the top of the waste, the check errs towards
-keeping the game alive.
+it as a move would mean the game could never end.
+
+"Nothing left to turn up can help" accounts for the draw mode. Drawing one at a
+time brings every card to the top of the waste eventually, but drawing three at
+a time only ever surfaces every third card, and recycling deals them in the same
+order — so the rest stay buried for good. The check simulates the deck cycle to
+work out which cards genuinely surface, and ignores the ones that never will.
 
 ## Rules and scoring
 

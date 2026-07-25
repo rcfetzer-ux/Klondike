@@ -250,11 +250,38 @@ var Klondike = (function () {
     return this.stock.length > 0 || this.waste.length > 0;
   };
 
-  /* Could any card still sitting in the stock or waste be placed at all?
-     In draw-3 not every card is guaranteed to reach the top of the waste,
-     so this errs towards "yes" rather than ending a live game. */
+  /* Which cards can actually reach the top of the waste by drawing alone?
+     In draw-1 that is every one of them; in draw-3 only every third card
+     surfaces, and recycling restores the same order, so the rest never come
+     up at all. Since this is only consulted when no other move exists, no
+     card can leave the waste to shift the grouping — which makes the answer
+     exact rather than a guess. */
+  Game.prototype.reachableWasteCards = function () {
+    var stock = this.stock.slice();
+    var waste = this.waste.slice();
+    var limit = 4 * (stock.length + waste.length + 2);   // several full cycles
+    var seen = {};
+    var tops = [];
+
+    for (var step = 0; step < limit; step++) {
+      if (waste.length) {
+        var top = waste[waste.length - 1];
+        if (!seen[top.id]) { seen[top.id] = true; tops.push(top); }
+      }
+      if (!stock.length && !waste.length) break;
+      if (!stock.length) {
+        while (waste.length) stock.push(waste.pop());     // recycle, exactly as draw() does
+      } else {
+        var count = Math.min(this.drawCount, stock.length);
+        for (var i = 0; i < count; i++) waste.push(stock.pop());
+      }
+    }
+    return tops;
+  };
+
+  /* Could any card the player can still turn up be placed anywhere? */
   Game.prototype.stockHasPlayable = function () {
-    var pool = this.stock.concat(this.waste);
+    var pool = this.reachableWasteCards();
     for (var i = 0; i < pool.length; i++) {
       var card = pool[i];
       for (var f = 0; f < 4; f++) {

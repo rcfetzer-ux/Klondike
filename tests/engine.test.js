@@ -51,6 +51,7 @@ ok(g3.score === s3 || g3.score >= 0, 'draw-3 recycle has no -100');
 // hand-built board for rule checks
 function blank(drawCount = 1) {
   const game = new Klondike({ drawCount });
+  game.drawCount = drawCount;
   game.tableau = [[], [], [], [], [], [], []];
   game.foundations = [[], [], [], []];
   game.waste = []; game.stock = []; game.score = 0; game.moves = 0; game.history = [];
@@ -269,6 +270,58 @@ t.tableau[1] = [];
 moves = t.findMoves();
 ok(moves.length === 1 && moves[0].kind === 'reveal', 'moving a king off a hidden card into an empty column is hinted');
 ok(t.isDeadEnd() === false, 'that board is not a dead end');
+
+// ---- what the player can actually turn up ------------------------------
+t = blank(1);
+t.stock = [C('S', 2, false), C('S', 3, false), C('S', 4, false), C('S', 5, false), C('S', 6, false)];
+ok(t.reachableWasteCards().length === 5, 'draw-1 eventually surfaces every stock card');
+
+t = blank(3);
+t.stock = [C('S', 2, false), C('S', 3, false), C('S', 4, false), C('S', 5, false), C('S', 6, false)];
+let tops = t.reachableWasteCards().map(c => c.id).sort();
+ok(tops.join(',') === 'S2,S4', 'draw-3 only surfaces every third card: ' + tops.join(','));
+
+// a playable card that never comes up must not keep a dead game alive
+t = blank(3);
+t.tableau[0] = [C('S', 13)];
+t.tableau[1] = [C('C', 13)];
+t.tableau[2] = [C('S', 12)];
+t.tableau[3] = [C('C', 12)];
+t.tableau[4] = [C('S', 11)];
+t.tableau[5] = [C('C', 11)];
+t.tableau[6] = [C('S', 10)];
+/* H12 would sit on S13. Drawing three at a time deals the whole stock in one
+   go, so only the card at the bottom of the pile tops the waste — here D7,
+   leaving the queen permanently buried. */
+t.stock = [C('D', 7, false), C('D', 8, false), C('H', 12, false)];
+ok(t.reachableWasteCards().map(c => c.id).join(',') === 'D7', 'only the bottom card of a 3-card stock surfaces in draw-3');
+ok(t.isDeadEnd() === true, 'a playable card that never surfaces does not keep the game alive');
+
+// deal the same three cards in the order that does put the queen on top
+t.stock = [C('H', 12, false), C('D', 7, false), C('D', 8, false)];
+ok(t.reachableWasteCards().map(c => c.id).join(',') === 'H12', 'the queen surfaces from this ordering');
+ok(t.isDeadEnd() === false, 'a card that does surface keeps the game alive');
+
+// ---- every deal must actually finish -----------------------------------
+// Greedy play, both draw modes: no game may cycle the deck forever.
+[1, 3].forEach(function (drawCount) {
+  let looped = 0, finished = 0;
+  for (let n = 0; n < 120; n++) {
+    const game = new Klondike({ drawCount });
+    let idleDraws = 0;
+    for (let step = 0; step < 6000; step++) {
+      if (game.won) { finished++; break; }
+      const options = game.findMoves();
+      if (options.length) { game.move(options[0].source, options[0].target); idleDraws = 0; continue; }
+      if (game.isDeadEnd() || !game.canDraw()) { finished++; break; }
+      game.draw();
+      // one full pass of the deck with nothing to do and no ending declared
+      if (++idleDraws > 60) { looped++; break; }
+    }
+  }
+  ok(looped === 0, 'draw-' + drawCount + ': no game cycles the deck forever, stuck=' + looped);
+  ok(finished === 120, 'draw-' + drawCount + ': every deal ends in a win or a dead end, ended=' + finished);
+});
 
 console.log(fails === 0 ? 'ALL ENGINE TESTS PASSED' : fails + ' FAILURE(S)');
 process.exit(fails ? 1 : 0);
