@@ -9,7 +9,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Klondike Solitaire</title>
-<link rel="stylesheet" href="assets/css/style.css?v=7">
+<link rel="stylesheet" href="assets/css/style.css?v=8">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon.svg">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%230e3b2e'/><text x='16' y='24' font-size='22' text-anchor='middle' fill='%23fff'>%E2%99%A0</text></svg>">
@@ -261,6 +261,7 @@
     <div class="panel-actions">
       <button class="btn btn-primary" id="btnDeadNew" type="button">New game</button>
       <button class="btn" id="btnDeadUndo" type="button">Undo last move</button>
+      <button class="btn" id="btnDeadUndoAll" type="button">Undo all moves</button>
     </div>
   </div>
 </div>
@@ -310,6 +311,11 @@
         <button class="seg" data-draw="3" type="button">Draw 3</button>
       </div>
       <p class="muted small">Changing the draw mode starts a new game.</p>
+      <h3>This deal</h3>
+      <div class="panel-actions">
+        <button class="btn" id="btnUndoAllMenu" type="button">Undo all moves</button>
+      </div>
+      <p class="muted small">Puts every card back where it was dealt and starts the deal again from the top. The clock keeps running.</p>
       <h3>Deals</h3>
       <label class="row-toggle"><span>Winnable deals only</span><input type="checkbox" id="optWinnable"></label>
       <p class="muted small">Every deal is run through a solver first, and only one with a proven winning line is dealt. Losing then means the line you chose, not the shuffle. Finding one takes a moment, and it rules out the hardest deals — the solver has to see the win to allow the deal.</p>
@@ -333,12 +339,12 @@
   </div>
 </div>
 
-<script src="assets/js/cards.js?v=7"></script>
-<script src="assets/js/storage.js?v=7"></script>
-<script src="assets/js/game.js?v=7"></script>
-<script src="assets/js/solver.js?v=7"></script>
-<script src="assets/js/cascade.js?v=7"></script>
-<script src="assets/js/ui.js?v=7"></script>
-<script src="assets/js/app.js?v=7"></script>
+<script src="assets/js/cards.js?v=8"></script>
+<script src="assets/js/storage.js?v=8"></script>
+<script src="assets/js/game.js?v=8"></script>
+<script src="assets/js/solver.js?v=8"></script>
+<script src="assets/js/cascade.js?v=8"></script>
+<script src="assets/js/ui.js?v=8"></script>
+<script src="assets/js/app.js?v=8"></script>
 </body>
 </html>

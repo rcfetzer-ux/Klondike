@@ -3,7 +3,7 @@
 (function () {
   'use strict';
 
-  var BUILD = '2026.07.25.7';
+  var BUILD = '2026.07.25.8';
 
   var BACK_PATTERNS = [
     { id: 'lattice', name: 'Lattice' },
@@ -45,7 +45,8 @@
   var el = {};
   ['statScore', 'statTime', 'statMoves', 'statBest', 'board', 'btnUndo', 'btnAuto',
    'btnHint', 'btnPause', 'btnNew', 'btnMenu', 'pauseOverlay', 'pauseTitle', 'pauseText',
-   'deadOverlay', 'deadSummary', 'deadText', 'btnDeadNew', 'btnDeadUndo',
+   'deadOverlay', 'deadSummary', 'deadText', 'btnDeadNew', 'btnDeadUndo', 'btnDeadUndoAll',
+   'btnUndoAllMenu',
    'pauseSummary', 'btnResume', 'btnPauseNew', 'winOverlay', 'winSummary', 'btnWinNew',
    'btnWinClose', 'menuOverlay', 'btnMenuClose', 'backPatterns', 'backColors',
    'drawMode', 'optQuickFoundation', 'optHaptics', 'statsSummary', 'scoreList',
@@ -79,6 +80,7 @@
     el.btnUndo.disabled = !game.canUndo() || autoRunning;
     el.btnAuto.disabled = autoRunning || game.won || !game.nextFoundationMove();
     el.btnHint.disabled = autoRunning || game.won || dead;
+    el.btnUndoAllMenu.disabled = autoRunning || !game.canUndoAll();
   }
 
   /* ---- timer and saving ------------------------------------------------ */
@@ -318,7 +320,31 @@
       ? 'This deal could be won — a different line of play gets there. Undo and try again, or take a fresh one.'
       : 'This deal is out of plays — nothing on the board moves, and nothing left to turn up can help.';
     el.btnDeadUndo.hidden = !game.canUndo();
+    el.btnDeadUndoAll.hidden = !game.canUndoAll();
     show(el.deadOverlay);
+  }
+
+  /* Back to the deal as it was handed out, with the same cards. Used from
+     the menu mid-game and from the end-of-game screen. */
+  function undoAll(options) {
+    if (!game.canUndoAll()) return false;
+    if (options && options.confirm && !dead &&
+        !window.confirm('Put every card back and start this deal again?')) return false;
+    if (!game.undoAll()) return false;
+
+    dead = false;
+    hintIndex = 0;
+    toast(null);
+    UI.clearHint();
+    UI.clearSelection();
+    UI.setLocked(false);
+    hide(el.deadOverlay);
+    hide(el.menuOverlay);
+    UI.render();
+    updateScoreboard();
+    startTimer();
+    save();
+    return true;
   }
 
   /* Backing out of a dead end puts the player back in the game. */
@@ -682,6 +708,7 @@
     el.btnMenu.addEventListener('click', function () {
       renderStats();
       syncMenu();
+      updateScoreboard();
       show(el.menuOverlay);
     });
     el.btnMenuClose.addEventListener('click', function () { hide(el.menuOverlay); });
@@ -698,6 +725,8 @@
     el.btnResume.addEventListener('click', resume);
     el.btnPauseNew.addEventListener('click', newGame);
     el.btnDeadNew.addEventListener('click', newGame);
+    el.btnDeadUndoAll.addEventListener('click', function () { undoAll(); });
+    el.btnUndoAllMenu.addEventListener('click', function () { undoAll({ confirm: true }); });
     el.btnDeadUndo.addEventListener('click', reviveFromDeadEnd);
     el.btnWinNew.addEventListener('click', function () { hide(el.winOverlay); startGame(); });
     el.btnWinClose.addEventListener('click', function () {
@@ -743,6 +772,7 @@
     get settings() { return settings; },
     get dead() { return dead; },
     hint: showHint,
+    undoAll: undoAll,
     checkDeadEnd: checkDeadEnd,
     ui: UI,
     save: save,

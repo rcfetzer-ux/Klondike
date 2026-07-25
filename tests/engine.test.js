@@ -323,5 +323,62 @@ ok(t.isDeadEnd() === false, 'a card that does surface keeps the game alive');
   ok(finished === 120, 'draw-' + drawCount + ': every deal ends in a win or a dead end, ended=' + finished);
 });
 
+// ---- undo all ----------------------------------------------------------
+const fresh = new Klondike({ drawCount: 1 });
+const opening = JSON.stringify(fresh.snapshot().tableau);
+fresh.elapsed = 140;
+fresh.draw(); fresh.draw();
+let played = 0;
+for (let n = 0; n < 40 && played < 6; n++) {
+  const options = fresh.findMoves();
+  if (!options.length) { if (!fresh.canDraw()) break; fresh.draw(); continue; }
+  fresh.move(options[0].source, options[0].target);
+  played++;
+}
+ok(fresh.moves > 0, 'the test deal actually moved, moves=' + fresh.moves);
+ok(fresh.canUndoAll() === true, 'undo all is available once something has happened');
+ok(fresh.undoAll() === true, 'undo all runs');
+ok(JSON.stringify(fresh.snapshot().tableau) === opening, 'undo all restores the deal exactly');
+ok(fresh.moves === 0 && fresh.score === 0, 'undo all resets score and move count');
+ok(fresh.elapsed === 140, 'undo all keeps the clock — time played is not undoable');
+ok(fresh.canUndo() === false, 'undo all leaves an empty history');
+ok(fresh.canUndoAll() === false, 'undo all is spent once the deal is back to the start');
+ok(fresh.stock.length === 24, 'the stock is whole again, stock=' + fresh.stock.length);
+
+// it reaches the start even when the move history has been trimmed away
+const trimmed = new Klondike({ drawCount: 1 });
+const trimmedOpening = JSON.stringify(trimmed.snapshot().tableau);
+trimmed.draw(); trimmed.draw(); trimmed.draw();
+trimmed.history = [];                    // as a reloaded save might arrive
+ok(trimmed.canUndoAll() === true, 'undo all still offered with no history left');
+trimmed.undoAll();
+ok(JSON.stringify(trimmed.snapshot().tableau) === trimmedOpening, 'undo all works from the stored deal');
+ok(trimmed.stock.length === 24, 'and the deck is whole');
+
+// saves written before the deal snapshot existed fall back to the history,
+// which unwinds every move rather than stopping part-way
+const legacy = new Klondike({ drawCount: 1 });
+const legacyOpening = JSON.stringify(legacy.snapshot());
+legacy.draw(); legacy.draw(); legacy.draw();
+legacy.initial = null;
+ok(legacy.canUndoAll() === true, 'an old save can still undo all');
+legacy.undoAll();
+ok(JSON.stringify(legacy.snapshot()) === legacyOpening, 'an old save unwinds all the way to the deal');
+
+// a won game has nothing to rewind
+const finished = new Klondike({ drawCount: 1 });
+finished.won = true;
+ok(finished.canUndoAll() === false, 'a won game does not offer undo all');
+
+// the deal snapshot survives a save and reload
+const saved = new Klondike({ drawCount: 3 });
+const savedOpening = JSON.stringify(saved.snapshot().tableau);
+saved.draw();
+const reloaded = Klondike.fromJSON(JSON.parse(JSON.stringify(saved.toJSON())));
+ok(!!reloaded.initial, 'the deal snapshot is saved');
+reloaded.undoAll();
+ok(JSON.stringify(reloaded.snapshot().tableau) === savedOpening, 'undo all works after a reload');
+ok(Klondike.isValidSave(JSON.parse(JSON.stringify(saved.toJSON()))), 'the save is still valid with the snapshot in it');
+
 console.log(fails === 0 ? 'ALL ENGINE TESTS PASSED' : fails + ' FAILURE(S)');
 process.exit(fails ? 1 : 0);

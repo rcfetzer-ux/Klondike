@@ -45,6 +45,7 @@ var Klondike = (function () {
     this.won = false;
     this.started = Date.now();
     this.history = [];
+    this.initial = this.snapshot();     // the deal as it was handed out
   };
 
   /* ---- pile access ---------------------------------------------------- */
@@ -429,6 +430,30 @@ var Klondike = (function () {
 
   Game.prototype.canUndo = function () { return this.history.length > 0; };
 
+  /* Rewind the whole deal. The opening snapshot is kept from the moment the
+     cards were dealt, so this reaches the start even when the move history
+     has been trimmed — falling back to unwinding that history for saves
+     written before the snapshot existed. */
+  Game.prototype.undoAll = function () {
+    if (!this.canUndoAll()) return false;
+
+    if (this.initial) {
+      var elapsed = this.elapsed;
+      this.restore(JSON.parse(JSON.stringify(this.initial)));
+      this.elapsed = elapsed;           // time spent is not something to undo
+    } else {
+      while (this.history.length) this.restore(this.history.pop());
+    }
+    this.history = [];
+    return true;
+  };
+
+  Game.prototype.canUndoAll = function () {
+    if (this.won) return false;
+    if (this.initial) return this.moves > 0;
+    return this.history.length > 0;
+  };
+
   /* ---- serialisation --------------------------------------------------- */
 
   Game.prototype.snapshot = function () {
@@ -461,6 +486,7 @@ var Klondike = (function () {
     var data = this.snapshot();
     data.drawCount = this.drawCount;
     data.winnable = !!this.winnable;
+    data.initial = this.initial || null;
     data.started = this.started;
     data.history = this.history.slice(-SAVED_HISTORY);
     return data;
@@ -472,6 +498,7 @@ var Klondike = (function () {
     game.started = data.started || Date.now();
     game.history = Array.isArray(data.history) ? data.history : [];
     game.winnable = !!data.winnable;
+    game.initial = data.initial || null;
     game.restore(data);
     return game;
   };

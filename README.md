@@ -31,6 +31,10 @@ step, no network calls — open `index.html` and play.
 - **The win cascade.** Clear the board and the cards launch off the foundations,
   bounce along the bottom of the screen and stream off the sides, painting
   trails over everything — the Windows Solitaire send-off. Tap to cut it short.
+- **Undo all.** Puts every card back where it was dealt and starts the deal
+  again from the top, from *Menu → Game* or from the end-of-game screen. The
+  opening deal is kept from the moment the cards are dealt, so this reaches the
+  start however long the game has run and survives closing the tab.
 - **Undo** (deep history), **Auto** to send everything home once the board is
   open, and a choice of **draw 1** or **draw 3**.
 
