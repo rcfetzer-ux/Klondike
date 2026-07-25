@@ -480,6 +480,17 @@ body {
   to { opacity: 1; transform: translate(-50%, 0); }
 }
 
+/* ---------- win cascade ---------- */
+
+.cascade {
+  position: fixed;
+  inset: 0;
+  z-index: 60;              /* over the board, under the overlays */
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+}
+
 /* ---------- overlays ---------- */
 
 .overlay {

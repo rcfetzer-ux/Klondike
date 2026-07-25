@@ -3,7 +3,7 @@
 (function () {
   'use strict';
 
-  var BUILD = '2026.07.25.6';
+  var BUILD = '2026.07.25.7';
 
   var BACK_PATTERNS = [
     { id: 'lattice', name: 'Lattice' },
@@ -105,6 +105,7 @@
   /* ---- game lifecycle -------------------------------------------------- */
 
   function installGame(fresh, options) {
+    if (window.Cascade) Cascade.stop();
     game = fresh;
     recorded = false;
     dead = false;
@@ -333,6 +334,36 @@
     save();
   }
 
+  /* Cards for the cascade: taken off the foundations a pile at a time so all
+     four empty together, each with the screen position it is falling from. */
+  function cascadeCards() {
+    var rows = [];
+    var deepest = 0;
+    game.foundations.forEach(function (pile) { deepest = Math.max(deepest, pile.length); });
+    for (var depth = 0; depth < deepest; depth++) {
+      for (var f = 0; f < 4; f++) {
+        var pile = game.foundations[f];
+        var card = pile[pile.length - 1 - depth];
+        if (!card) continue;
+        var rect = UI.cardRect(card.id);
+        if (!rect) continue;
+        rows.push({
+          label: Cards.label(card),
+          symbol: Cards.suit(card).symbol,
+          red: Cards.isRed(card),
+          x: rect.x, y: rect.y, w: rect.w, h: rect.h
+        });
+      }
+    }
+    return rows;
+  }
+
+  function startCascade() {
+    var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduced || !window.Cascade) return false;
+    return Cascade.start({ cards: cascadeCards() });
+  }
+
   function handleWin() {
     stopTimer();
     autoRunning = false;
@@ -359,7 +390,19 @@
       ['Games won', stats.won + ' of ' + stats.played],
       ['Streak', stats.streak]
     ]);
-    setTimeout(function () { show(el.winOverlay); }, 550);
+    var cascading = startCascade();
+
+    /* Let the cascade run before the panel covers it, and let a tap cut it
+       short for anyone who has seen it a hundred times. */
+    var revealed = false;
+    function reveal() {
+      if (revealed) return;
+      revealed = true;
+      document.removeEventListener('pointerdown', reveal);
+      show(el.winOverlay);
+    }
+    if (cascading) document.addEventListener('pointerdown', reveal);
+    setTimeout(reveal, cascading ? 4200 : 550);
   }
 
   /* ---- auto finish ----------------------------------------------------- */
@@ -370,13 +413,13 @@
     UI.setLocked(true);
     UI.clearSelection();
     updateScoreboard();
-    var idleDraws = 0;
+    var steps = 0;
 
     function step() {
-      if (!autoRunning) return;
+      if (!autoRunning || steps++ > 400) { stopAuto(); save(); return; }
+
       var move = game.nextFoundationMove();
       if (move) {
-        idleDraws = 0;
         game.move(move.source, move.target);
         UI.render();
         updateScoreboard();
@@ -384,15 +427,18 @@
         setTimeout(step, 90);
         return;
       }
-      // No card is ready: cycle the stock, but only while nothing is hidden.
-      if (game.canAutoFinish() && (game.stock.length || game.waste.length) && idleDraws < 60) {
-        idleDraws += 1;
+
+      /* Nothing is ready on the board. Turning the deck is only worth doing
+         if a card that can actually surface will go home — otherwise this
+         spins through the deck forever achieving nothing. */
+      if (game.canAutoFinish() && game.drawsToFoundationPlay() >= 0) {
         game.draw();
         UI.render();
         updateScoreboard();
         setTimeout(step, 60);
         return;
       }
+
       stopAuto();
       save();
       checkDeadEnd();
@@ -654,7 +700,10 @@
     el.btnDeadNew.addEventListener('click', newGame);
     el.btnDeadUndo.addEventListener('click', reviveFromDeadEnd);
     el.btnWinNew.addEventListener('click', function () { hide(el.winOverlay); startGame(); });
-    el.btnWinClose.addEventListener('click', function () { hide(el.winOverlay); });
+    el.btnWinClose.addEventListener('click', function () {
+      hide(el.winOverlay);
+      if (window.Cascade) Cascade.stop();
+    });
 
     document.addEventListener('visibilitychange', function () {
       if (document.hidden) { save(); }

@@ -28,6 +28,9 @@ step, no network calls — open `index.html` and play.
 - **Winnable deals only** (optional). Every shuffle is run through a solver
   before you see it, and only a deal with a proven winning line is dealt — so a
   loss is down to the line you took, not the cards.
+- **The win cascade.** Clear the board and the cards launch off the foundations,
+  bounce along the bottom of the screen and stream off the sides, painting
+  trails over everything — the Windows Solitaire send-off. Tap to cut it short.
 - **Undo** (deep history), **Auto** to send everything home once the board is
   open, and a choice of **draw 1** or **draw 3**.
 
@@ -128,6 +131,7 @@ manifest.json         installs to a phone home screen
 assets/css/style.css  all styling, including the card-back patterns
 assets/js/cards.js    deck and the stacking rules
 assets/js/game.js     game engine: piles, moves, scoring, undo, save/restore
+assets/js/cascade.js  the bouncing-cards win animation
 assets/js/solver.js   searches for a winning line, for the winnable-deals setting
 assets/js/storage.js  localStorage for the save, settings and scoreboard
 assets/js/ui.js       board layout, rendering, drag and tap handling

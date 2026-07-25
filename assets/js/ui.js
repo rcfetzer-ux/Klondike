@@ -494,6 +494,14 @@ var UI = (function () {
 
   function flash(el) { reject(el); }
 
+  /* Where a card currently sits on screen, for the win cascade. */
+  function cardRect(id) {
+    var el = cardEls[id];
+    if (!el) return null;
+    var r = el.getBoundingClientRect();
+    return { x: r.left, y: r.top, w: r.width, h: r.height };
+  }
+
   function clearSelection() { selection = null; }
 
   return {
@@ -506,6 +514,7 @@ var UI = (function () {
     clearHint: clearHint,
     applyCardBack: applyCardBack,
     render: render,
+    cardRect: cardRect,
     flash: flash
   };
 })();

@@ -336,6 +336,32 @@ var Klondike = (function () {
     return false;
   };
 
+  /* How many turns of the deck until the waste top can go to a foundation?
+     -1 when no card that can actually surface will ever fit — which is what
+     stops auto-finish from cycling the deck for nothing. */
+  Game.prototype.drawsToFoundationPlay = function () {
+    var stock = this.stock.slice();
+    var waste = this.waste.slice();
+    var limit = 2 * (stock.length + waste.length + 2);
+
+    for (var draws = 0; draws <= limit; draws++) {
+      if (waste.length) {
+        var top = waste[waste.length - 1];
+        for (var f = 0; f < 4; f++) {
+          if (Cards.canStackFoundation(top, this.foundations[f])) return draws;
+        }
+      }
+      if (!stock.length && !waste.length) break;
+      if (!stock.length) {
+        while (waste.length) stock.push(waste.pop());
+      } else {
+        var count = Math.min(this.drawCount, stock.length);
+        for (var i = 0; i < count; i++) waste.push(stock.pop());
+      }
+    }
+    return -1;
+  };
+
   /* Nothing on the board advances, and nothing left to turn up can help. */
   Game.prototype.isDeadEnd = function () {
     if (this.won) return false;
