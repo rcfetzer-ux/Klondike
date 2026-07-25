@@ -250,6 +250,47 @@ var Klondike = (function () {
     return this.stock.length > 0 || this.waste.length > 0;
   };
 
+  /* What does the player get for turning the deck over? Returns the first
+     move that drawing would open up, and how much drawing it takes to get
+     there, so a hint can promise something concrete instead of just
+     pointing at the stock. Null means drawing leads nowhere. */
+  Game.prototype.drawPreview = function () {
+    var snapshot = this.snapshot();
+    var historyLength = this.history.length;
+    var limit = 2 * (this.stock.length + this.waste.length + 2);
+    var draws = 0;
+    var recycled = false;
+    var result = null;
+
+    while (draws < limit) {
+      var moves = this.findMoves();
+      if (moves.length && draws > 0) {
+        // Describe it now: once the board is restored these refs mean
+        // something else entirely.
+        var cards = this.grab(moves[0].source) || [];
+        var targetPile = moves[0].target.type === 'foundation'
+          ? null
+          : this.tableau[moves[0].target.i];
+        result = {
+          draws: draws,
+          recycled: recycled,
+          card: cards[0] || null,
+          targetType: moves[0].target.type,
+          onto: targetPile && targetPile.length ? targetPile[targetPile.length - 1] : null
+        };
+        break;
+      }
+      if (!this.canDraw()) break;
+      if (!this.stock.length) recycled = true;
+      this.draw();
+      draws += 1;
+    }
+
+    this.restore(snapshot);
+    this.history.length = historyLength;
+    return result;
+  };
+
   /* Which cards can actually reach the top of the waste by drawing alone?
      In draw-1 that is every one of them; in draw-3 only every third card
      surfaces, and recycling restores the same order, so the rest never come

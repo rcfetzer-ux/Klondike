@@ -3,6 +3,8 @@
 (function () {
   'use strict';
 
+  var BUILD = '2026.07.25.4';
+
   var BACK_PATTERNS = [
     { id: 'lattice', name: 'Lattice' },
     { id: 'dots',    name: 'Dots' },
@@ -40,7 +42,7 @@
    'pauseSummary', 'btnResume', 'btnPauseNew', 'winOverlay', 'winSummary', 'btnWinNew',
    'btnWinClose', 'menuOverlay', 'btnMenuClose', 'backPatterns', 'backColors',
    'drawMode', 'optQuickFoundation', 'optHaptics', 'statsSummary', 'scoreList',
-   'btnResetStats'].forEach(function (id) { el[id] = document.getElementById(id); });
+   'btnResetStats', 'hintToast', 'buildStamp'].forEach(function (id) { el[id] = document.getElementById(id); });
 
   /* ---- helpers --------------------------------------------------------- */
 
@@ -139,6 +141,7 @@
 
   function onMove() {
     hintIndex = 0;
+    toast(null);
     updateScoreboard();
     if (game.won) { handleWin(); return; }
     save();
@@ -146,6 +149,36 @@
   }
 
   /* ---- hints ----------------------------------------------------------- */
+
+  var toastTimer = null;
+
+  function toast(message) {
+    if (toastTimer) clearTimeout(toastTimer);
+    if (!message) { el.hintToast.hidden = true; return; }
+    el.hintToast.textContent = message;
+    el.hintToast.hidden = false;
+    toastTimer = setTimeout(function () { el.hintToast.hidden = true; }, 3600);
+  }
+
+  function cardName(card) {
+    return Cards.label(card) + Cards.suit(card).symbol;
+  }
+
+  /* "the 6♦ onto the 7♠" / "the 6♦ to its foundation" */
+  function describePlay(card, targetType, onto) {
+    if (!card) return '';
+    var what = 'the ' + cardName(card);
+    if (targetType === 'foundation') return what + ' to its foundation';
+    if (!onto) return what + ' to the empty column';
+    return what + ' onto the ' + cardName(onto);
+  }
+
+  function describeMove(move) {
+    var cards = game.grab(move.source) || [];
+    var pile = move.target.type === 'tableau' ? game.tableau[move.target.i] : null;
+    return describePlay(cards[0], move.target.type,
+                        pile && pile.length ? pile[pile.length - 1] : null);
+  }
 
   /* Every useful move, plus turning the stock over as a last suggestion. */
   function hintList() {
@@ -156,10 +189,35 @@
 
   function showHint() {
     if (dead || game.won || autoRunning || paused) return;
+
+    // Pressing hint always re-checks: if the deal is finished, say so now
+    // rather than pointing at a deck that cannot help.
+    checkDeadEnd();
+    if (dead) return;
+
     var list = hintList();
     if (!list.length) { endDeadGame(); return; }
     if (hintIndex >= list.length) hintIndex = 0;
-    UI.showHint(list[hintIndex]);
+
+    var hint = list[hintIndex];
+    UI.showHint(hint);
+
+    if (hint.kind === 'draw') {
+      // Promise something concrete, so "turn the deck over" never reads as
+      // "this game is stuck and nobody is telling you".
+      var preview = game.drawPreview();
+      if (!preview) {
+        toast('Nothing in the deck can be played.');
+      } else {
+        var target = describePlay(preview.card, preview.targetType, preview.onto);
+        var taps = preview.draws === 1 ? 'One more turn of the deck' : preview.draws + ' turns of the deck';
+        toast(taps + (preview.recycled ? ' (past the end and round again)' : '') +
+              (target ? ' brings up ' + target + '.' : '.'));
+      }
+    } else {
+      toast('Play ' + describeMove(hint) + '.');
+    }
+
     hintIndex = (hintIndex + 1) % list.length;
   }
 
@@ -172,6 +230,7 @@
 
   function endDeadGame() {
     dead = true;
+    toast(null);
     stopTimer();
     UI.clearHint();
     UI.clearSelection();
@@ -446,7 +505,14 @@
     el.btnUndo.addEventListener('click', function () {
       if (autoRunning) return;
       UI.clearSelection();
-      if (game.undo()) { hintIndex = 0; UI.render(); updateScoreboard(); save(); }
+      if (game.undo()) {
+        hintIndex = 0;
+        toast(null);
+        UI.render();
+        updateScoreboard();
+        save();
+        checkDeadEnd();
+      }
     });
     el.btnHint.addEventListener('click', showHint);
     el.btnAuto.addEventListener('click', autoFinish);
@@ -482,6 +548,7 @@
       hooks: { onMove: onMove }
     });
     UI.setSettings(settings);
+    el.buildStamp.textContent = BUILD;
     bindButtons();
     buildMenu();
     syncMenu();

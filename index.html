@@ -9,7 +9,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Klondike Solitaire</title>
-<link rel="stylesheet" href="assets/css/style.css">
+<link rel="stylesheet" href="assets/css/style.css?v=4">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon.svg">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%230e3b2e'/><text x='16' y='24' font-size='22' text-anchor='middle' fill='%23fff'>%E2%99%A0</text></svg>">
@@ -49,6 +49,8 @@
     <button class="tool" id="btnNew" type="button"><span class="tool-icon">&#8635;</span><span class="tool-label">New</span></button>
     <button class="tool" id="btnMenu" type="button"><span class="tool-icon">&#9776;</span><span class="tool-label">Menu</span></button>
   </nav>
+
+  <div id="hintToast" class="toast" hidden></div>
 
 </div>
 
@@ -123,6 +125,8 @@
       <h3>Options</h3>
       <label class="row-toggle"><span>Tap a card twice to send it home</span><input type="checkbox" id="optQuickFoundation" checked></label>
       <label class="row-toggle"><span>Vibrate on invalid move</span><input type="checkbox" id="optHaptics" checked></label>
+      <h3>Version</h3>
+      <p class="muted small">Build <span id="buildStamp">—</span>. If the game misbehaves after an update, pull down to refresh the page.</p>
       <h3>How to play</h3>
       <p class="muted small">Build the four foundations up from Ace to King by suit. Stack tableau cards down in alternating colours. Only Kings go into an empty column. Drag a card, or tap it and then tap where it should go. Stuck? <em>Hint</em> points out a move — press it again for another one. If the deal ever runs out of plays, the game says so and ends.</p>
     </section>
@@ -138,10 +142,10 @@
   </div>
 </div>
 
-<script src="assets/js/cards.js"></script>
-<script src="assets/js/storage.js"></script>
-<script src="assets/js/game.js"></script>
-<script src="assets/js/ui.js"></script>
-<script src="assets/js/app.js"></script>
+<script src="assets/js/cards.js?v=4"></script>
+<script src="assets/js/storage.js?v=4"></script>
+<script src="assets/js/game.js?v=4"></script>
+<script src="assets/js/ui.js?v=4"></script>
+<script src="assets/js/app.js?v=4"></script>
 </body>
 </html>

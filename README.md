@@ -15,9 +15,11 @@ step, no network calls — open `index.html` and play.
   back tomorrow — the game reopens exactly where you left it, clock included.
 - **Customisable card backs.** Six patterns × eight colours, remembered between
   sessions.
-- **Hints.** Press *Hint* to light up a card and where it should go; press it
-  again to cycle through the other options. When nothing on the board moves, the
-  hint points at the stock instead.
+- **Hints.** Press *Hint* to light up a card and where it should go, with a note
+  naming the play; press it again to cycle through the other options. When
+  nothing on the board moves, the hint points at the stock and says what turning
+  it over will bring up — so "keep drawing" is never mistaken for a dead end.
+  Pressing *Hint* also re-checks whether the deal is finished.
 - **Automatic ending.** When a deal genuinely runs out of plays the game stops
   the clock and says so, offering a new deal or an undo to back out of the move
   that killed it.
@@ -98,3 +100,14 @@ with no dependencies:
 ```sh
 node tests/engine.test.js
 ```
+
+Alongside the unit tests it plays 120 deals per draw mode to completion,
+asserting that every one ends in a win or a declared dead end rather than
+cycling the deck forever.
+
+## Updating
+
+Asset URLs carry a `?v=` marker that changes with each release, so phones pick
+up new code instead of a cached copy. The current build is shown under
+*Menu → Game → Version*; if the game ever behaves like an older version, check
+that number and refresh.
