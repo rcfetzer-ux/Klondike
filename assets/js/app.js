@@ -3,7 +3,7 @@
 (function () {
   'use strict';
 
-  var BUILD = '2026.07.25.5';
+  var BUILD = '2026.07.25.6';
 
   var BACK_PATTERNS = [
     { id: 'lattice', name: 'Lattice' },
@@ -12,6 +12,13 @@
     { id: 'grid',    name: 'Grid' },
     { id: 'stripes', name: 'Stripes' },
     { id: 'classic', name: 'Classic' }
+  ];
+
+  var THEMES = [
+    { id: 'classic', name: 'Classic', blurb: 'Plain woven backs in the pattern and colour you pick below.' },
+    { id: 'jungle',  name: 'Jungle',  blurb: 'Canopy and sunlight on the backs, with a tiger, toucan, tree frog and monkey on the faces.' },
+    { id: 'ocean',   name: 'Ocean',   blurb: 'Reef water on the backs, with a whale, clownfish, sea turtle and octopus on the faces.' },
+    { id: 'desert',  name: 'Desert',  blurb: 'Dunes at sundown on the backs, with a camel, fennec fox, lizard and scorpion on the faces.' }
   ];
 
   var BACK_COLORS = [
@@ -43,7 +50,7 @@
    'btnWinClose', 'menuOverlay', 'btnMenuClose', 'backPatterns', 'backColors',
    'drawMode', 'optQuickFoundation', 'optHaptics', 'statsSummary', 'scoreList',
    'btnResetStats', 'hintToast', 'buildStamp', 'optWinnable', 'searchOverlay',
-   'searchText', 'btnSearchCancel'].forEach(function (id) { el[id] = document.getElementById(id); });
+   'searchText', 'btnSearchCancel', 'themeTiles', 'themeNote', 'classicOnly'].forEach(function (id) { el[id] = document.getElementById(id); });
 
   /* ---- helpers --------------------------------------------------------- */
 
@@ -452,6 +459,24 @@
   /* ---- menu ------------------------------------------------------------ */
 
   function buildMenu() {
+    el.themeTiles.innerHTML = THEMES.map(function (t) {
+      var preview = t.id === 'classic'
+        ? '<span class="theme-preview pat-lattice" data-back-color="crimson">' +
+            '<span class="card-back mini"><span class="back-art"></span></span></span>'
+        : '<span class="theme-preview" data-theme="' + t.id + '">' +
+            '<svg class="scene" viewBox="0 0 100 140" preserveAspectRatio="xMidYMid slice" aria-hidden="true">' +
+            '<use href="#back-' + t.id + '"></use></svg></span>';
+      return '<button class="theme-tile" data-theme-id="' + t.id + '" type="button" aria-label="' + t.name + '">' +
+             preview + '<span>' + t.name + '</span></button>';
+    }).join('');
+
+    el.themeTiles.addEventListener('click', function (e) {
+      var btn = e.target.closest('[data-theme-id]');
+      if (!btn) return;
+      settings.theme = btn.dataset.themeId;
+      persistSettings();
+    });
+
     el.backPatterns.innerHTML = BACK_PATTERNS.map(function (p) {
       return '<button class="swatch pat-' + p.id + '" data-pattern="' + p.id + '" type="button" ' +
              'aria-label="' + p.name + '"><span class="card-back mini"><span class="back-art"></span></span>' +
@@ -537,6 +562,19 @@
   }
 
   function syncMenu() {
+    var theme = settings.theme || 'classic';
+    document.querySelectorAll('[data-theme-id]').forEach(function (b) {
+      b.classList.toggle('is-active', b.dataset.themeId === theme);
+    });
+    var classicPreview = el.themeTiles.querySelector('[data-theme-id="classic"] .theme-preview');
+    if (classicPreview) {
+      classicPreview.className = 'theme-preview pat-' + settings.backPattern;
+      classicPreview.dataset.backColor = settings.backColor;
+    }
+    var chosen = THEMES.filter(function (t) { return t.id === theme; })[0] || THEMES[0];
+    el.themeNote.textContent = chosen.blurb;
+    el.classicOnly.hidden = theme !== 'classic';
+
     document.querySelectorAll('[data-pattern]').forEach(function (b) {
       b.classList.toggle('is-active', b.dataset.pattern === settings.backPattern);
       b.dataset.backColor = settings.backColor;

@@ -9,12 +9,183 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Klondike Solitaire</title>
-<link rel="stylesheet" href="assets/css/style.css?v=5">
+<link rel="stylesheet" href="assets/css/style.css?v=6">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon.svg">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%230e3b2e'/><text x='16' y='24' font-size='22' text-anchor='middle' fill='%23fff'>%E2%99%A0</text></svg>">
 </head>
 <body>
+
+<svg id="artSprite" aria-hidden="true" focusable="false" width="0" height="0" style="position:absolute">
+<defs>
+
+<!-- ================= JUNGLE ================= -->
+
+<symbol id="back-jungle" viewBox="0 0 100 140">
+  <rect width="100" height="140" fill="#0a3a20"/>
+  <circle cx="50" cy="52" r="21" fill="#f6cf6a"/>
+  <circle cx="50" cy="52" r="21" fill="none" stroke="#fbe6a8" stroke-width="2" opacity=".6"/>
+  <path d="M0 84c14-12 26-12 38-2s26 12 38 2 20-8 24-6v62H0z" fill="#10552f"/>
+  <path d="M0 104c14-12 28-10 42 0s28 10 42 0 14-4 16-4v40H0z" fill="#177040"/>
+  <path d="M0 124c16-10 32-8 48 0s34 6 52-2v18H0z" fill="#1f9052"/>
+  <path d="M-4 18c18-6 34 2 42 16-16 10-34 6-46-6z" fill="#1f9052"/>
+  <path d="M104 6c-18 0-34 10-40 24 18 8 34 2 44-10z" fill="#177040"/>
+  <path d="M2 22c14 0 26 6 32 12M98 12c-14 2-25 9-30 18" stroke="#0a3a20" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+  <ellipse cx="16" cy="62" rx="12" ry="5" fill="#2aa860" transform="rotate(-28 16 62)"/>
+  <ellipse cx="86" cy="74" rx="11" ry="4.5" fill="#2aa860" transform="rotate(24 86 74)"/>
+  <circle cx="70" cy="112" r="4" fill="#f2c85c" opacity=".8"/>
+  <circle cx="30" cy="120" r="3" fill="#f2c85c" opacity=".6"/>
+</symbol>
+
+<symbol id="art-jungle-S" viewBox="0 0 100 100"><!-- tiger -->
+  <path d="M24 30c-4-10-2-16 2-18 5-2 10 3 12 8zM76 30c4-10 2-16-2-18-5-2-10 3-12 8z" fill="#e8873a"/>
+  <ellipse cx="50" cy="54" rx="30" ry="28" fill="#f0983f"/>
+  <path d="M30 36c4 4 6 10 6 14M70 36c-4 4-6 10-6 14M24 56h8M76 56h-8M32 70c3 3 6 5 8 6M68 70c-3 3-6 5-8 6" stroke="#3a2411" stroke-width="3.4" fill="none" stroke-linecap="round"/>
+  <ellipse cx="50" cy="66" rx="16" ry="12" fill="#fde8cf"/>
+  <circle cx="40" cy="50" r="4" fill="#3a2411"/><circle cx="60" cy="50" r="4" fill="#3a2411"/>
+  <path d="M50 60l-5 4h10z" fill="#c2542c"/>
+  <path d="M50 66v5M50 71c-3 3-8 2-9-1M50 71c3 3 8 2 9-1" stroke="#3a2411" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+</symbol>
+
+<symbol id="art-jungle-H" viewBox="0 0 100 100"><!-- toucan -->
+  <path d="M58 44c14-6 30-8 34-2 3 6-8 16-22 20-8 2-14 0-16-4z" fill="#f0a12e"/>
+  <path d="M60 50c12-4 24-6 28-3" stroke="#c2542c" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+  <ellipse cx="42" cy="56" rx="24" ry="26" fill="#25272e"/>
+  <path d="M36 44c10-2 18 2 20 8-8 4-18 4-24 0z" fill="#f7f2e6"/>
+  <circle cx="46" cy="44" r="6" fill="#f7f2e6"/><circle cx="47" cy="44" r="3" fill="#25272e"/>
+  <path d="M22 70c8 8 20 10 30 6-6 8-20 10-30 2z" fill="#3b3f49"/>
+  <path d="M30 84h6M46 84h6" stroke="#f0a12e" stroke-width="4" stroke-linecap="round"/>
+</symbol>
+
+<symbol id="art-jungle-D" viewBox="0 0 100 100"><!-- tree frog -->
+  <ellipse cx="50" cy="62" rx="28" ry="24" fill="#3fae53"/>
+  <circle cx="32" cy="38" r="14" fill="#4cc063"/><circle cx="68" cy="38" r="14" fill="#4cc063"/>
+  <circle cx="32" cy="38" r="8" fill="#f6d64a"/><circle cx="68" cy="38" r="8" fill="#f6d64a"/>
+  <ellipse cx="32" cy="38" rx="3" ry="7" fill="#20301c"/><ellipse cx="68" cy="38" rx="3" ry="7" fill="#20301c"/>
+  <path d="M34 68c8 8 24 8 32 0" stroke="#1f6b32" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <ellipse cx="20" cy="76" rx="9" ry="6" fill="#4cc063" transform="rotate(-20 20 76)"/>
+  <ellipse cx="80" cy="76" rx="9" ry="6" fill="#4cc063" transform="rotate(20 80 76)"/>
+  <circle cx="14" cy="80" r="4" fill="#f0a12e"/><circle cx="86" cy="80" r="4" fill="#f0a12e"/>
+</symbol>
+
+<symbol id="art-jungle-C" viewBox="0 0 100 100"><!-- monkey -->
+  <circle cx="22" cy="48" r="11" fill="#6b452c"/><circle cx="78" cy="48" r="11" fill="#6b452c"/>
+  <circle cx="22" cy="48" r="6" fill="#c58a5e"/><circle cx="78" cy="48" r="6" fill="#c58a5e"/>
+  <circle cx="50" cy="50" r="28" fill="#7d5233"/>
+  <ellipse cx="50" cy="58" rx="21" ry="19" fill="#d79b6b"/>
+  <path d="M28 38c6-8 16-12 22-12s16 4 22 12c-8-4-14-6-22-6s-14 2-22 6z" fill="#6b452c"/>
+  <circle cx="42" cy="52" r="4" fill="#3a2411"/><circle cx="58" cy="52" r="4" fill="#3a2411"/>
+  <ellipse cx="46" cy="64" rx="2" ry="3" fill="#8a5a3a"/><ellipse cx="54" cy="64" rx="2" ry="3" fill="#8a5a3a"/>
+  <path d="M42 70c4 4 12 4 16 0" stroke="#8a5a3a" stroke-width="3" fill="none" stroke-linecap="round"/>
+</symbol>
+
+<!-- ================= OCEAN ================= -->
+
+<symbol id="back-ocean" viewBox="0 0 100 140">
+  <rect width="100" height="140" fill="#062a44"/>
+  <circle cx="30" cy="26" r="14" fill="#ffe6a8"/>
+  <circle cx="24" cy="22" r="12" fill="#062a44"/>
+  <path d="M0 54c12-8 22-8 34 0s26 8 38 0 20-6 28-2v14c-10-6-20-6-30 0s-26 8-38 0-22-8-32-2z" fill="#0b4f78"/>
+  <path d="M0 78c12-8 22-8 34 0s26 8 38 0 20-6 28-2v14c-10-6-20-6-30 0s-26 8-38 0-22-8-32-2z" fill="#0f6a9c"/>
+  <path d="M0 102c12-8 22-8 34 0s26 8 38 0 20-6 28-2v40H0z" fill="#1585bd"/>
+  <path d="M18 132c0-14 4-22 8-26-8 0-14 8-16 26zM50 134c-2-18 2-30 8-36-10 2-16 14-16 36zM78 132c0-12 4-20 8-24-8 0-14 6-16 24z" fill="#0a4462"/>
+  <circle cx="66" cy="70" r="3" fill="#bfe6ff" opacity=".8"/>
+  <circle cx="74" cy="60" r="2" fill="#bfe6ff" opacity=".7"/>
+  <circle cx="60" cy="58" r="1.6" fill="#bfe6ff" opacity=".6"/>
+</symbol>
+
+<symbol id="art-ocean-S" viewBox="0 0 100 100"><!-- whale -->
+  <path d="M14 56c0-16 16-26 34-26 20 0 32 10 36 20-10 2-16 8-16 14 0 5 2 9 6 12-14 6-32 6-44 0-10-5-16-12-16-20z" fill="#2b6ea8"/>
+  <path d="M84 50c6-8 12-12 14-10 2 3-2 12-8 20 6 6 8 14 6 16-2 2-8-2-14-10z" fill="#1f5482"/>
+  <path d="M20 62c12 8 34 10 48 4" stroke="#8fc4e8" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <circle cx="36" cy="46" r="4" fill="#0f2f4a"/>
+  <path d="M44 22c-2-8 2-14 6-16-6 0-12 6-12 16z" fill="#bfe6ff"/>
+  <path d="M52 20c2-8 8-12 12-12-4 2-8 8-8 16z" fill="#bfe6ff"/>
+</symbol>
+
+<symbol id="art-ocean-H" viewBox="0 0 100 100"><!-- clownfish -->
+  <path d="M18 52c8-16 26-24 42-24 14 0 22 8 24 16-4 2-8 6-8 10s4 8 8 10c-4 8-14 14-26 14-16 0-32-10-40-26z" fill="#f2782b"/>
+  <path d="M40 30c4 16 4 30 0 42M62 30c4 14 4 28 0 40" stroke="#fdf4e6" stroke-width="7" fill="none"/>
+  <path d="M40 30c4 16 4 30 0 42M62 30c4 14 4 28 0 40" stroke="#25272e" stroke-width="2" fill="none" opacity=".35"/>
+  <path d="M14 40c-8 4-10 16-8 24 6-2 12-8 14-14z" fill="#e05f22"/>
+  <path d="M44 24c6-8 14-10 18-6-4 4-8 8-10 12z" fill="#e05f22"/>
+  <circle cx="76" cy="46" r="4.5" fill="#25272e"/><circle cx="77.5" cy="45" r="1.6" fill="#fff"/>
+</symbol>
+
+<symbol id="art-ocean-D" viewBox="0 0 100 100"><!-- sea turtle -->
+  <ellipse cx="50" cy="54" rx="30" ry="24" fill="#2f8f6a"/>
+  <path d="M50 32l14 8v18l-14 8-14-8V40z" fill="#43b184"/>
+  <path d="M50 32v-6M64 40l8-4M64 58l8 6M50 68v8M36 58l-8 6M36 40l-8-4" stroke="#1f6b4f" stroke-width="3" stroke-linecap="round"/>
+  <ellipse cx="88" cy="44" rx="10" ry="8" fill="#43b184"/>
+  <circle cx="92" cy="42" r="2.6" fill="#123a2c"/>
+  <ellipse cx="22" cy="34" rx="11" ry="7" fill="#43b184" transform="rotate(-28 22 34)"/>
+  <ellipse cx="22" cy="74" rx="11" ry="7" fill="#43b184" transform="rotate(28 22 74)"/>
+  <ellipse cx="74" cy="76" rx="9" ry="6" fill="#43b184" transform="rotate(20 74 76)"/>
+</symbol>
+
+<symbol id="art-ocean-C" viewBox="0 0 100 100"><!-- octopus -->
+  <path d="M18 66c-6 10-12 14-14 12s2-10 8-18M34 74c-4 12-8 18-12 18s-2-12 2-22M66 74c4 12 8 18 12 18s2-12-2-22M82 66c6 10 12 14 14 12s-2-10-8-18M50 78c0 14-2 20-6 20s-4-10-2-22" stroke="#a4569b" stroke-width="8" fill="none" stroke-linecap="round"/>
+  <path d="M22 56c0-20 12-32 28-32s28 12 28 32c0 10-12 16-28 16s-28-6-28-16z" fill="#c069b6"/>
+  <circle cx="39" cy="46" r="7" fill="#fdf4e6"/><circle cx="61" cy="46" r="7" fill="#fdf4e6"/>
+  <circle cx="40" cy="47" r="3.4" fill="#3a1f38"/><circle cx="62" cy="47" r="3.4" fill="#3a1f38"/>
+  <circle cx="32" cy="66" r="2.6" fill="#8e4487"/><circle cx="50" cy="70" r="2.6" fill="#8e4487"/><circle cx="68" cy="66" r="2.6" fill="#8e4487"/>
+</symbol>
+
+<!-- ================= DESERT ================= -->
+
+<symbol id="back-desert" viewBox="0 0 100 140">
+  <rect width="100" height="140" fill="#b9532a"/>
+  <rect width="100" height="70" fill="#d9743a"/>
+  <circle cx="50" cy="40" r="18" fill="#ffd88a"/>
+  <path d="M0 70c18-10 32-10 50 0s32 10 50 0v14c-18 10-32 10-50 0s-32-10-50 0z" fill="#c2622e"/>
+  <path d="M0 88c20-12 34-10 52 2s30 12 48 2v48H0z" fill="#a84d24"/>
+  <path d="M0 112c22-12 38-8 54 4s28 10 46 2v22H0z" fill="#8c3d1c"/>
+  <path d="M30 128v-24c0-4 4-6 6-2v26zM36 112c0-8-6-10-10-8-3 2-2 8 4 10zM36 108c0-9 7-12 11-9 3 3 1 9-5 11z" fill="#40331f"/>
+  <ellipse cx="70" cy="124" rx="12" ry="3" fill="#40331f" opacity=".5"/>
+  <path d="M64 124c2-8 6-12 10-12s8 4 10 12z" fill="#40331f"/>
+</symbol>
+
+<symbol id="art-desert-S" viewBox="0 0 100 100"><!-- camel -->
+  <path d="M20 68c-2-14 4-22 14-24 6-10 14-12 20-6 8-6 16-2 18 8 10 4 12 14 8 22z" fill="#d8a468"/>
+  <path d="M76 46c8-2 14 2 16 8 2 8-4 12-10 10" fill="#d8a468"/>
+  <path d="M24 46c-8-2-12-10-10-18 6 0 10 4 12 10z" fill="#c08f52"/>
+  <path d="M14 26c0-6 4-10 8-10 2 4 2 8 0 12z" fill="#c08f52"/>
+  <circle cx="19" cy="24" r="2.4" fill="#3a2411"/>
+  <path d="M28 68v18M44 70v18M60 70v16M74 66v18" stroke="#c08f52" stroke-width="7" stroke-linecap="round"/>
+  <path d="M28 86v4M44 88v3M60 86v4M74 84v5" stroke="#8a5a2c" stroke-width="7" stroke-linecap="round"/>
+</symbol>
+
+<symbol id="art-desert-H" viewBox="0 0 100 100"><!-- fennec fox -->
+  <path d="M26 44C18 30 16 16 20 12c5-4 16 6 22 20zM74 44c8-14 10-28 6-32-5-4-16 6-22 20z" fill="#e8c48f"/>
+  <path d="M28 40c-5-10-6-18-4-21 3-2 10 4 14 14zM72 40c5-10 6-18 4-21-3-2-10 4-14 14z" fill="#e0987a"/>
+  <path d="M22 56c0-14 12-24 28-24s28 10 28 24c0 16-12 26-28 26S22 72 22 56z" fill="#f0d3a2"/>
+  <path d="M36 68c4-8 10-12 14-12s10 4 14 12c-6 6-22 6-28 0z" fill="#fdf4e6"/>
+  <circle cx="38" cy="54" r="4.6" fill="#3a2411"/><circle cx="62" cy="54" r="4.6" fill="#3a2411"/>
+  <path d="M50 66l-4 4h8z" fill="#3a2411"/>
+  <path d="M50 70v4M50 74c-3 3-7 2-8 0M50 74c3 3 7 2 8 0" stroke="#a8794a" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+</symbol>
+
+<symbol id="art-desert-D" viewBox="0 0 100 100"><!-- lizard -->
+  <path d="M62 44c14-2 24 2 28 10 3 8-2 16-10 18-10 3-18-2-18-8 0-4 4-6 8-6 3 0 5 2 5 4" fill="none" stroke="#8aa84a" stroke-width="7" stroke-linecap="round"/>
+  <ellipse cx="42" cy="48" rx="26" ry="14" fill="#9cbb52"/>
+  <ellipse cx="16" cy="44" rx="13" ry="10" fill="#a8c95c"/>
+  <path d="M30 60l-8 12M54 60l6 12M30 36l-8-10M54 36l8-10" stroke="#8aa84a" stroke-width="6" stroke-linecap="round"/>
+  <circle cx="10" cy="40" r="3.2" fill="#2e3a17"/>
+  <circle cx="34" cy="44" r="3" fill="#c8dd86"/><circle cx="46" cy="50" r="3" fill="#c8dd86"/><circle cx="56" cy="44" r="3" fill="#c8dd86"/>
+</symbol>
+
+<symbol id="art-desert-C" viewBox="0 0 100 100"><!-- scorpion -->
+  <ellipse cx="46" cy="58" rx="20" ry="13" fill="#8c4a22"/>
+  <path d="M66 54c10-4 18-14 18-24 0-8-4-12-8-10-4 2-4 8-2 12" fill="none" stroke="#a05a2a" stroke-width="7" stroke-linecap="round"/>
+  <circle cx="76" cy="20" r="7" fill="#c26a30"/>
+  <path d="M28 46c-8-6-16-6-20-2M28 70c-8 6-16 6-20 2" stroke="#a05a2a" stroke-width="6" fill="none" stroke-linecap="round"/>
+  <path d="M12 38c-6 0-9 4-8 8 4 2 8 0 10-3zM12 78c-6 0-9-4-8-8 4-2 8 0 10 3z" fill="#c26a30"/>
+  <path d="M40 72v10M52 72v10M34 44v-8M52 44v-8" stroke="#a05a2a" stroke-width="4.5" stroke-linecap="round"/>
+  <circle cx="40" cy="52" r="2.4" fill="#f0c98a"/><circle cx="52" cy="52" r="2.4" fill="#f0c98a"/>
+</symbol>
+
+</defs>
+</svg>
 
 <div id="app">
 
@@ -121,10 +292,15 @@
     </div>
 
     <section class="tab-panel is-active" data-panel="cards">
+      <h3>Theme</h3>
+      <div class="theme-tiles" id="themeTiles"></div>
+      <p class="theme-note" id="themeNote"></p>
+      <div id="classicOnly">
       <h3>Pattern</h3>
       <div class="swatches" id="backPatterns"></div>
       <h3>Colour</h3>
       <div class="swatches swatches-color" id="backColors"></div>
+      </div>
     </section>
 
     <section class="tab-panel" data-panel="game">
@@ -157,11 +333,11 @@
   </div>
 </div>
 
-<script src="assets/js/cards.js?v=5"></script>
-<script src="assets/js/storage.js?v=5"></script>
-<script src="assets/js/game.js?v=5"></script>
-<script src="assets/js/solver.js?v=5"></script>
-<script src="assets/js/ui.js?v=5"></script>
-<script src="assets/js/app.js?v=5"></script>
+<script src="assets/js/cards.js?v=6"></script>
+<script src="assets/js/storage.js?v=6"></script>
+<script src="assets/js/game.js?v=6"></script>
+<script src="assets/js/solver.js?v=6"></script>
+<script src="assets/js/ui.js?v=6"></script>
+<script src="assets/js/app.js?v=6"></script>
 </body>
 </html>

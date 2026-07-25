@@ -13,8 +13,10 @@ step, no network calls — open `index.html` and play.
   current/best streak and your five best games.
 - **Stop and continue.** Every move is saved. Hit *Pause*, close the tab, come
   back tomorrow — the game reopens exactly where you left it, clock included.
-- **Customisable card backs.** Six patterns × eight colours, remembered between
-  sessions.
+- **Themes and card backs.** Classic gives you six woven back patterns across
+  eight colours. Jungle, Ocean and Desert each dress the table, paint a
+  landscape on the card backs, and put a themed animal on the face of every
+  card — one per suit. All remembered between sessions.
 - **Hints.** Press *Hint* to light up a card and where it should go, with a note
   naming the play; press it again to cycle through the other options. When
   nothing on the board moves, the hint points at the stock and says what turning
@@ -49,6 +51,25 @@ some winnable deals are reported unsolvable and quietly reshuffled. That is the
 safe direction to be wrong in — a deal is only ever accepted on a proven win —
 but it does mean this setting skips the very hardest deals rather than serving
 every winnable one.
+
+### Themes
+
+| Theme | Card back | ♠ | ♥ | ♦ | ♣ |
+| --- | --- | --- | --- | --- | --- |
+| Jungle | canopy and sun | tiger | toucan | tree frog | monkey |
+| Ocean | reef water and moon | whale | clownfish | sea turtle | octopus |
+| Desert | dunes at sundown | camel | fennec fox | lizard | scorpion |
+
+The artwork is hand-written SVG inlined into `index.html` as a sprite, so the
+game stays a single self-contained folder with no image files and no network
+requests. A card is about 47px wide on a phone, so the drawings are bold
+silhouettes rather than detailed illustrations — detail simply disappears at
+that size.
+
+The animal replaces the large centre pip, never the corner index: rank and suit
+stay exactly where they are read from, which matters because a fanned column
+shows only that top strip. The corner is set slightly larger under a theme,
+since it is then carrying the suit on its own.
 
 ### What counts as "no moves left"
 

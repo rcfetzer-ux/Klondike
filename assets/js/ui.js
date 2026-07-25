@@ -62,10 +62,34 @@ var UI = (function () {
     applyCardBack();
   }
 
+  /* Points one card at the right artwork for the current theme. The classic
+     theme has no illustrations, so the references are cleared and CSS falls
+     back to the plain pip and the woven pattern. */
+  function applyArt(el, card) {
+    var theme = settings.theme || 'classic';
+    var art = el.querySelector('.art use');
+    var scene = el.querySelector('.scene use');
+    if (theme === 'classic') {
+      art.removeAttribute('href');
+      scene.removeAttribute('href');
+      return;
+    }
+    art.setAttribute('href', '#art-' + theme + '-' + card.s);
+    scene.setAttribute('href', '#back-' + theme);
+  }
+
   function applyCardBack() {
     board.className = board.className.replace(/\bpat-\S+/g, '').trim();
     board.classList.add('pat-' + settings.backPattern);
     board.dataset.backColor = settings.backColor;
+    board.dataset.theme = settings.theme || 'classic';
+    document.documentElement.dataset.theme = settings.theme || 'classic';
+    if (game) {
+      eachCard(function (card) {
+        var el = cardEls[card.id];
+        if (el) applyArt(el, card);
+      });
+    }
   }
 
   function setGame(next) {
@@ -104,10 +128,15 @@ var UI = (function () {
         '<div class="card-face card-front">' +
           '<span class="corner corner-tl">' + corner + '</span>' +
           '<span class="pip">' + suit.symbol + '</span>' +
+          '<svg class="art" viewBox="0 0 100 100" aria-hidden="true"><use href=""></use></svg>' +
           '<span class="corner corner-br">' + corner + '</span>' +
         '</div>' +
-        '<div class="card-face card-back"><span class="back-art"></span></div>' +
+        '<div class="card-face card-back">' +
+          '<svg class="scene" viewBox="0 0 100 140" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><use href=""></use></svg>' +
+          '<span class="back-art"></span>' +
+        '</div>' +
       '</div>';
+    applyArt(el, card);
     return el;
   }
 

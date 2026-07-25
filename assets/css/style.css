@@ -45,6 +45,26 @@ body {
   background: radial-gradient(120% 80% at 50% 0%, var(--felt-1), var(--felt-2) 70%);
 }
 
+/* ---------- themes ---------- */
+
+[data-theme="jungle"] {
+  --felt-1: #1d6f42;
+  --felt-2: #062a17;
+  --chrome: #05200f;
+}
+
+[data-theme="ocean"] {
+  --felt-1: #12608f;
+  --felt-2: #041f34;
+  --chrome: #03182a;
+}
+
+[data-theme="desert"] {
+  --felt-1: #96592a;
+  --felt-2: #351d10;
+  --chrome: #2a1710;
+}
+
 /* ---------- scoreboard ---------- */
 
 #scoreboard {
@@ -198,6 +218,32 @@ body {
 .is-red .corner, .is-red .pip { color: var(--red); }
 .is-black .corner, .is-black .pip { color: var(--black); }
 
+.card .art {
+  position: absolute;
+  left: 14%;
+  top: 20%;
+  width: 72%;
+  height: 60%;
+  display: none;
+}
+
+[data-theme="jungle"] .card .art,
+[data-theme="ocean"] .card .art,
+[data-theme="desert"] .card .art { display: block; }
+
+[data-theme="jungle"] .card .pip,
+[data-theme="ocean"] .card .pip,
+[data-theme="desert"] .card .pip { display: none; }
+
+/* the corner index carries the whole suit signal once the pip is gone */
+[data-theme="jungle"] .corner b,
+[data-theme="ocean"] .corner b,
+[data-theme="desert"] .corner b { font-size: calc(var(--card-w) * 0.36); }
+
+[data-theme="jungle"] .corner i,
+[data-theme="ocean"] .corner i,
+[data-theme="desert"] .corner i { font-size: calc(var(--card-w) * 0.29); }
+
 .card.is-selected .card-face {
   box-shadow: 0 0 0 2.5px var(--gold), 0 4px 10px rgba(0, 0, 0, 0.45);
 }
@@ -307,6 +353,70 @@ body {
   color: rgba(255, 255, 255, 0.6);
   font-size: calc(var(--card-w, 44px) * 0.45);
   line-height: 1;
+}
+
+.card .scene {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: none;
+  border-radius: var(--radius);
+}
+
+[data-theme="jungle"] .card .scene,
+[data-theme="ocean"] .card .scene,
+[data-theme="desert"] .card .scene,
+.theme-preview .scene { display: block; }
+
+/* the woven patterns belong to the classic theme only — scoped to real
+   cards so the menu's classic preview keeps its pattern while a theme is on */
+[data-theme="jungle"] .card .card-back,
+[data-theme="ocean"] .card .card-back,
+[data-theme="desert"] .card .card-back { background-image: none; background-color: transparent; }
+
+/* ---------- theme picker ---------- */
+
+.theme-tiles {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.theme-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 3px;
+  border: 1.5px solid transparent;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.2);
+  color: var(--muted);
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.theme-tile.is-active { border-color: var(--gold); color: var(--text); }
+
+.theme-preview {
+  display: block;
+  position: relative;
+  width: 38px;
+  height: 53px;
+  border-radius: 5px;
+  overflow: hidden;
+  background: var(--bc, #b3232f);
+}
+
+.theme-preview .scene { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+.theme-note {
+  margin: 8px 0 0;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--muted);
 }
 
 /* ---------- toolbar ---------- */
@@ -556,6 +666,7 @@ body {
 .swatch.is-active { border-color: var(--gold); color: var(--text); }
 
 .card-back.mini {
+  display: block;          /* an inline span would collapse to nothing */
   position: relative;
   width: 40px;
   height: 56px;
