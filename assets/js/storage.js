@@ -49,6 +49,7 @@ var Store = (function () {
 
   var DEFAULT_SETTINGS = {
     theme: 'classic',
+    plateImages: false,
     backPattern: 'lattice',
     backColor: 'crimson',
     drawCount: 1,

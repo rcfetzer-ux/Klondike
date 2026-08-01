@@ -80,6 +80,24 @@ game stays a single self-contained folder with no image files and no network
 requests. That constraint also sets the ceiling: these are stylised line-and-
 wash plates, not engravings.
 
+#### Using real plates instead
+
+For the genuine article, drop public-domain illustrations into
+`assets/plates/` — `jungle-S.jpg`, `ocean-D.jpg` and so on, one per theme and
+suit — and switch on **Menu → Card backs → Plate images**. Any size works;
+the browser crops each to the card. A file that is missing or fails to load
+uncovers the drawn plate for that suit, so the twelve can be added one at a
+time and the game never ends up with a blank card.
+
+Nothing in that folder is touched while the setting is off, so the default
+build still makes no network requests at all. `assets/plates/README.md` lists
+the file names, the species, and where the classic plates come from —
+Brehms Tierleben, Haeckel, Audubon, Bloch, the Biodiversity Heritage Library —
+along with the licence caveat worth reading before committing a scan.
+
+`tools/make-test-plate.js` writes a placeholder image if you want to see the
+mechanism work before sourcing the real thing.
+
 The animal never touches the corner index. Rank and suit stay exactly where
 they are read from, which matters because a fanned column shows only that top
 strip, and three things keep them legible over a full-bleed illustration: the
@@ -140,7 +158,9 @@ or any static host) this is automatic.
 ## Layout
 
 ```
-index.html            markup and the overlays
+index.html            markup, the overlays and the plate artwork sprite
+assets/plates/        optional drop-in illustrations (see the README there)
+tools/                a placeholder-image generator for testing plates
 manifest.json         installs to a phone home screen
 assets/css/style.css  all styling, including the card-back patterns
 assets/js/cards.js    deck and the stacking rules

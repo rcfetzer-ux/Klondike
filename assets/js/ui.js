@@ -64,11 +64,21 @@ var UI = (function () {
 
   /* Points one card at the right artwork for the current theme. The classic
      theme has no illustrations, so the references are cleared and CSS falls
-     back to the plain pip and the woven pattern. */
+     back to the plain pip and the woven pattern.
+
+     With plate images switched on, a real illustration dropped into
+     assets/plates/ is layered over the drawn one. A missing or broken file
+     simply uncovers the drawing again — nothing is fetched unless the
+     setting is on, so the game makes no requests by default. */
   function applyArt(el, card) {
     var theme = settings.theme || 'classic';
     var art = el.querySelector('.art use');
     var scene = el.querySelector('.scene use');
+    var plate = el.querySelector('.plate');
+
+    plate.classList.remove('is-loaded');
+    plate.removeAttribute('src');
+
     if (theme === 'classic') {
       art.removeAttribute('href');
       scene.removeAttribute('href');
@@ -76,6 +86,22 @@ var UI = (function () {
     }
     art.setAttribute('href', '#art-' + theme + '-' + card.s);
     scene.setAttribute('href', '#back-' + theme);
+
+    if (!settings.plateImages) return;
+    var base = 'assets/plates/' + theme + '-' + card.s;
+    plate.onload = function () { plate.classList.add('is-loaded'); };
+    plate.onerror = function () {
+      // one retry on the other extension, then give the drawing back
+      if (plate.dataset.tried === 'jpg') {
+        plate.removeAttribute('src');
+        plate.classList.remove('is-loaded');
+        return;
+      }
+      plate.dataset.tried = 'jpg';
+      plate.src = base + '.png';
+    };
+    plate.dataset.tried = '';
+    plate.src = base + '.jpg';
   }
 
   function applyCardBack() {
@@ -130,6 +156,7 @@ var UI = (function () {
              the index has to survive whatever the illustration does */
           '<span class="pip">' + suit.symbol + '</span>' +
           '<svg class="art" viewBox="0 0 100 145" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><use href=""></use></svg>' +
+          '<img class="plate" alt="" aria-hidden="true">' +
           '<span class="corner-wash"></span>' +
           '<span class="corner corner-tl">' + corner + '</span>' +
           '<span class="corner corner-br">' + corner + '</span>' +

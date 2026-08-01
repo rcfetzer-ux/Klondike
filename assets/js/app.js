@@ -3,7 +3,7 @@
 (function () {
   'use strict';
 
-  var BUILD = '2026.07.25.10';
+  var BUILD = '2026.07.25.11';
 
   var BACK_PATTERNS = [
     { id: 'lattice', name: 'Lattice' },
@@ -51,7 +51,7 @@
    'btnWinClose', 'menuOverlay', 'btnMenuClose', 'backPatterns', 'backColors',
    'drawMode', 'optQuickFoundation', 'optHaptics', 'statsSummary', 'scoreList',
    'btnResetStats', 'hintToast', 'buildStamp', 'optWinnable', 'searchOverlay',
-   'searchText', 'btnSearchCancel', 'themeTiles', 'themeNote', 'classicOnly'].forEach(function (id) { el[id] = document.getElementById(id); });
+   'searchText', 'btnSearchCancel', 'themeTiles', 'themeNote', 'classicOnly', 'optPlates'].forEach(function (id) { el[id] = document.getElementById(id); });
 
   /* ---- helpers --------------------------------------------------------- */
 
@@ -601,6 +601,10 @@
       hide(el.menuOverlay);
       startGame({ closeOverlays: true });
     });
+    el.optPlates.addEventListener('change', function () {
+      settings.plateImages = el.optPlates.checked;
+      persistSettings();
+    });
     el.optQuickFoundation.addEventListener('change', function () {
       settings.quickFoundation = el.optQuickFoundation.checked;
       persistSettings();
@@ -657,6 +661,7 @@
     document.querySelectorAll('[data-draw]').forEach(function (b) {
       b.classList.toggle('is-active', +b.dataset.draw === settings.drawCount);
     });
+    el.optPlates.checked = !!settings.plateImages;
     el.optWinnable.checked = !!settings.winnableOnly;
     el.optQuickFoundation.checked = !!settings.quickFoundation;
     el.optHaptics.checked = !!settings.haptics;

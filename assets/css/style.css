@@ -227,6 +227,19 @@ body {
   display: none;
 }
 
+/* A real plate dropped into assets/plates/, layered over the drawn one.
+   It only becomes visible once the file has actually loaded. */
+.card .plate {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: none;
+}
+
+.card .plate.is-loaded { display: block; }
+
 /* Lightens just the two index corners so rank and suit stay readable
    whatever the illustration does underneath. */
 .corner-wash {
