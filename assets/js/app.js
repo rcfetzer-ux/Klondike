@@ -3,7 +3,7 @@
 (function () {
   'use strict';
 
-  var BUILD = '2026.07.25.8';
+  var BUILD = '2026.07.25.9';
 
   var BACK_PATTERNS = [
     { id: 'lattice', name: 'Lattice' },

@@ -69,14 +69,19 @@ every winnable one.
 
 The artwork is hand-written SVG inlined into `index.html` as a sprite, so the
 game stays a single self-contained folder with no image files and no network
-requests. A card is about 47px wide on a phone, so the drawings are bold
-silhouettes rather than detailed illustrations — detail simply disappears at
-that size.
+requests. Each illustration fills the whole card face and is built in layers —
+a graded wash, background scenery, the animal with its own shading and
+markings, then a texture pattern over the top. The card backs are layered the
+same way, with scenery, a woven or scaled texture, a vignette and a double
+border.
 
-The animal replaces the large centre pip, never the corner index: rank and suit
-stay exactly where they are read from, which matters because a fanned column
-shows only that top strip. The corner is set slightly larger under a theme,
-since it is then carrying the suit on its own.
+The animal never touches the corner index. Rank and suit stay exactly where
+they are read from, which matters because a fanned column shows only that top
+strip, and three things keep them legible over a full-bleed illustration: the
+index is painted above the artwork, a soft white wash lifts just those two
+corners, and the type carries a white halo and a drop shadow. Each composition
+also keeps its subject clear of those corners — the first pass put the camel's
+head and the scorpion's pincers exactly where the index sits.
 
 ### What counts as "no moves left"
 

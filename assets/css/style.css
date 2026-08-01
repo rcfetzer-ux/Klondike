@@ -218,18 +218,33 @@ body {
 .is-red .corner, .is-red .pip { color: var(--red); }
 .is-black .corner, .is-black .pip { color: var(--black); }
 
+/* Themed artwork fills the whole face — the card becomes the picture. */
 .card .art {
   position: absolute;
-  left: 14%;
-  top: 20%;
-  width: 72%;
-  height: 60%;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   display: none;
+}
+
+/* Lightens just the two index corners so rank and suit stay readable
+   whatever the illustration does underneath. */
+.corner-wash {
+  position: absolute;
+  inset: 0;
+  display: none;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 32% 16% at 4% 2%, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0) 75%),
+    radial-gradient(ellipse 32% 16% at 96% 98%, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0) 75%);
 }
 
 [data-theme="jungle"] .card .art,
 [data-theme="ocean"] .card .art,
-[data-theme="desert"] .card .art { display: block; }
+[data-theme="desert"] .card .art,
+[data-theme="jungle"] .corner-wash,
+[data-theme="ocean"] .corner-wash,
+[data-theme="desert"] .corner-wash { display: block; }
 
 [data-theme="jungle"] .card .pip,
 [data-theme="ocean"] .card .pip,
@@ -243,6 +258,15 @@ body {
 [data-theme="jungle"] .corner i,
 [data-theme="ocean"] .corner i,
 [data-theme="desert"] .corner i { font-size: calc(var(--card-w) * 0.29); }
+
+/* A white halo and a soft shadow keep the index off the artwork behind it. */
+[data-theme="jungle"] .corner,
+[data-theme="ocean"] .corner,
+[data-theme="desert"] .corner {
+  text-shadow:
+    0 0 2px #fff, 0 0 3px #fff, 0 0 5px #fff,
+    0 1px 2px rgba(0, 0, 0, 0.45);
+}
 
 .card.is-selected .card-face {
   box-shadow: 0 0 0 2.5px var(--gold), 0 4px 10px rgba(0, 0, 0, 0.45);

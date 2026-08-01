@@ -126,9 +126,12 @@ var UI = (function () {
     el.innerHTML =
       '<div class="card-inner">' +
         '<div class="card-face card-front">' +
-          '<span class="corner corner-tl">' + corner + '</span>' +
+          /* artwork first, then the corner wash, then the indices on top:
+             the index has to survive whatever the illustration does */
           '<span class="pip">' + suit.symbol + '</span>' +
-          '<svg class="art" viewBox="0 0 100 100" aria-hidden="true"><use href=""></use></svg>' +
+          '<svg class="art" viewBox="0 0 100 145" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><use href=""></use></svg>' +
+          '<span class="corner-wash"></span>' +
+          '<span class="corner corner-tl">' + corner + '</span>' +
           '<span class="corner corner-br">' + corner + '</span>' +
         '</div>' +
         '<div class="card-face card-back">' +
