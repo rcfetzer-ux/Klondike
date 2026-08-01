@@ -67,13 +67,18 @@ every winnable one.
 | Ocean | reef water and moon | whale | clownfish | sea turtle | octopus |
 | Desert | dunes at sundown | camel | fennec fox | lizard | scorpion |
 
+The faces are drawn as natural-history plates: aged paper, sepia contour lines,
+shading built from hatch and stipple patterns rather than flat blocks, muted
+pigments, and a hairline plate rule. Every animal is shown in lateral view — the
+convention of the form, and what makes a silhouette read as a species rather
+than a mascot at thumbnail size. The scorpion is dorsal, as arthropods are
+conventionally plated. The card backs stay decorative: scenery, a woven or
+scaled texture, a vignette and a double border.
+
 The artwork is hand-written SVG inlined into `index.html` as a sprite, so the
 game stays a single self-contained folder with no image files and no network
-requests. Each illustration fills the whole card face and is built in layers —
-a graded wash, background scenery, the animal with its own shading and
-markings, then a texture pattern over the top. The card backs are layered the
-same way, with scenery, a woven or scaled texture, a vignette and a double
-border.
+requests. That constraint also sets the ceiling: these are stylised line-and-
+wash plates, not engravings.
 
 The animal never touches the corner index. Rank and suit stay exactly where
 they are read from, which matters because a fanned column shows only that top
